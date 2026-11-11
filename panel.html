@@ -359,7 +359,7 @@ function hermanoHtml(c) {
 }
 function cadenaHtml(x) {
   const c = x.cadena || {};
-  return `<div class="acordeon">${RAMAS.map(([k, n]) => {
+  return `<div class="acordeon">${RAMAS.filter(([k]) => k in c).map(([k, n]) => {
     const prs = c[k] || [];
     const abierto = S.abiertos.has(`${x.pr}:${k}`) || (S.abiertos.has(k) && !S.abiertos.has(`${x.pr}:${k}:cerrado`));
     const merg = prs.filter((p) => p.mergeado).length, abiertos = prs.filter((p) => p.estado === "abierto").length;
@@ -389,7 +389,7 @@ function vistaPorAprobar() {
     ? (d ? (items.length ? items.map((x) => `<article class="pr">
         <div class="pr-cab"><span class="repo">${externo(x.url, `${esc(x.repo)} #${esc(x.pr)}`)}</span>${x.hu ? externo(jira(x.hu), esc(x.hu)) : ""}<span class="chip c-ok">Listo${puntajeIa(x) ? ` · IA ${esc(puntajeIa(x))}` : ""}</span><span style="flex:1"></span><span class="tenue" style="font-size:12px">${esc([x.dev, hace(x.enviado_en || x.creado)].filter(Boolean).join(" · "))}</span></div>
         ${x.titulo ? `<div class="tit">${esc(x.titulo)}</div>` : ""}
-        <div class="meta">${["development", "master"].map((k) => { const p = ((x.cadena || {})[k] || []).slice(-1)[0]; return `<span>${k} · ${p ? `<span class="mono">#${esc(p.pr)}</span> ${esc(p.estado)}` : "—"}</span>`; }).join("")}</div>
+        <div class="meta">${["development", "master"].filter((k) => k in (x.cadena || {})).map((k) => { const p = ((x.cadena || {})[k] || []).slice(-1)[0]; return `<span>${k} · ${p ? `<span class="mono">#${esc(p.pr)}</span> ${esc(p.estado)}` : "—"}</span>`; }).join("")}</div>
         ${falloHtml(x)}
         <div class="acciones">${botonAprobar(x)}<button class="btn fant" data-ver-cadena="${esc(x.pr)}" aria-expanded="${S.sel === x.pr}">${S.sel === x.pr ? "Ocultar cadena" : "Ver cadena y puertas"}</button></div>
         ${S.sel === x.pr ? `<div style="display:grid;gap:12px"><div class="rot">Cadena de la historia</div>${cadenaHtml(x)}<div class="rot">Puertas</div>${puertasHtml(x)}</div>` : ""}
