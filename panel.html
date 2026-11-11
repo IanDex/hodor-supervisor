@@ -1,0 +1,1188 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hodor Supervisor</title>
+<link rel="icon" id="favicon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231f49b6'/%3E%3Cpath d='M9 16.5l4.5 4.5L23 11.5' fill='none' stroke='%23eef1fa' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<script>
+try { const t = localStorage.getItem("hodor-tema"); if (t === "claro" || t === "oscuro") document.documentElement.setAttribute("data-theme", t); } catch (e) {}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: dark;
+    --fondo: #0a1229; --lado: #081027; --caja: #111d40; --hondo: #0d1632; --sup: #0a1229; --sel: #1a2c5e; --hundido: #081027;
+    --linea: #22325f; --linea-2: #1a284f; --linea-3: #2b3d70; --texto: #eef1fa; --suave: #b5bac5; --tenue: #949aab; --tenue-2: #7f869a;
+    --prim: #1f49b6; --prim-h: #2a58cc; --prim-t: #ffffff; --acc: #5adbff; --acc-t: #90e7ff; --acc-f: #142a66;
+    --ok: #01d196; --ok-f: #0d3a3a; --sobre-ok: #062b22; --warn: #fcc956; --warn-t: #fddb8e; --warn-f: #3a3320;
+    --bad: #ea586f; --bad-t: #f4a3b0; --bad-f: #3d1c2e; --nar: #f59f62; --nar-f: #3d2a1f; --info: #8198d6; --velo: rgba(3,7,20,.62);
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="oscuro"]) {
+      color-scheme: light;
+      --fondo: #f3f5fa; --lado: #eaeef6; --caja: #ffffff; --hondo: #f6f8fc; --sup: #f3f5fa; --sel: #e2e8f4; --hundido: #eef2f8;
+      --linea: #d5dce9; --linea-2: #e2e7f0; --linea-3: #c3cde0; --texto: #0e1733; --suave: #3d4866; --tenue: #5a6480; --tenue-2: #626c88;
+      --prim: #1f49b6; --prim-h: #2a58cc; --prim-t: #ffffff; --acc: #0a6f93; --acc-t: #0a6f93; --acc-f: #e1f2f9;
+      --ok: #04754f; --ok-f: #ddf3ea; --sobre-ok: #ffffff; --warn: #8a5a00; --warn-t: #8a5a00; --warn-f: #fbf0d6;
+      --bad: #bb2540; --bad-t: #bb2540; --bad-f: #fbe4e8; --nar: #a64f0b; --nar-f: #fbe9da; --info: #3b56a3; --velo: rgba(14,23,51,.28);
+    }
+  }
+  :root[data-theme="claro"] {
+    color-scheme: light;
+    --fondo: #f3f5fa; --lado: #eaeef6; --caja: #ffffff; --hondo: #f6f8fc; --sup: #f3f5fa; --sel: #e2e8f4; --hundido: #eef2f8;
+    --linea: #d5dce9; --linea-2: #e2e7f0; --linea-3: #c3cde0; --texto: #0e1733; --suave: #3d4866; --tenue: #5a6480; --tenue-2: #626c88;
+    --prim: #1f49b6; --prim-h: #2a58cc; --prim-t: #ffffff; --acc: #0a6f93; --acc-t: #0a6f93; --acc-f: #e1f2f9;
+    --ok: #04754f; --ok-f: #ddf3ea; --sobre-ok: #ffffff; --warn: #8a5a00; --warn-t: #8a5a00; --warn-f: #fbf0d6;
+    --bad: #bb2540; --bad-t: #bb2540; --bad-f: #fbe4e8; --nar: #a64f0b; --nar-f: #fbe9da; --info: #3b56a3; --velo: rgba(14,23,51,.28);
+  }
+  * { box-sizing: border-box; }
+  html, body { background: var(--fondo); }
+  body { margin: 0; color: var(--texto); font: 14px/1.5 Inter, system-ui, sans-serif; }
+  .mono { font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; }
+  .rot { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--tenue); }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .tenue { color: var(--tenue); } .suave { color: var(--suave); }
+  a { color: var(--acc); } a:hover { color: var(--acc-t); }
+  button { font: inherit; cursor: pointer; color: inherit; }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; border-radius: 8px; padding: 7px 13px; border: 1px solid var(--linea); background: var(--caja); color: var(--texto); font-weight: 500; font-size: 13px; text-decoration: none; white-space: nowrap; }
+  .btn:hover:not(:disabled) { border-color: var(--tenue); color: var(--texto); }
+  .btn.prim { background: var(--prim); border-color: var(--prim); color: var(--prim-t); font-weight: 600; }
+  .btn.prim:hover:not(:disabled) { background: var(--prim-h); color: var(--prim-t); }
+  .btn.ok { background: var(--ok); border-color: var(--ok); color: var(--sobre-ok); font-weight: 600; }
+  .btn.peligro { color: var(--bad); border-color: var(--bad-f); }
+  .btn.fant { background: transparent; color: var(--suave); }
+  .btn.chico { padding: 3px 10px; font-size: 12px; border-radius: 6px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 2px 9px; border-radius: 999px; white-space: nowrap; border: 1px solid transparent; }
+  .chip.may { font-size: 11px; font-weight: 600; letter-spacing: .02em; text-transform: uppercase; padding: 1px 8px; }
+  .c-ok { color: var(--ok); background: var(--ok-f); } .c-warn { color: var(--warn); background: var(--warn-f); }
+  .c-bad { color: var(--bad); background: var(--bad-f); } .c-nar { color: var(--nar); background: var(--nar-f); }
+  .c-info { color: var(--info); border-color: var(--linea-3); } .c-acc { color: var(--acc); background: var(--acc-f); }
+  .c-off { color: var(--suave); background: var(--hondo); border-color: var(--linea); }
+  input, textarea, select { background: var(--hondo); color: var(--texto); border: 1px solid var(--linea); border-radius: 8px; padding: 7px 10px; font: inherit; font-size: 13px; }
+  select { appearance: none; -webkit-appearance: none; padding-right: 36px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%239397ab' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; background-size: 10px 6px; cursor: pointer; }
+  input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+
+  .app { display: flex; min-height: 100vh; }
+  nav.lado { flex: 0 0 236px; position: sticky; top: 0; height: 100vh; overflow: auto; background: var(--lado); border-right: 1px solid var(--linea); padding: 20px 14px; display: flex; flex-direction: column; gap: 18px; }
+  .marca { display: flex; align-items: center; gap: 10px; padding: 0 6px; }
+  .marca .logo { width: 28px; height: 28px; border-radius: 7px; background: var(--prim); color: var(--prim-t); display: grid; place-items: center; font-family: "IBM Plex Mono", monospace; font-weight: 500; font-size: 13px; }
+  .menu-lado { display: flex; flex-direction: column; gap: 2px; margin: 0; padding: 0; list-style: none; }
+  .item { all: unset; box-sizing: border-box; width: 100%; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; color: var(--suave); }
+  .item:hover { background: var(--sel); color: var(--texto); }
+  .item:focus-visible { outline: 2px solid var(--acc); outline-offset: 1px; }
+  .item[aria-current="page"] { background: var(--acc-f); color: var(--texto); font-weight: 500; }
+  .item svg { flex-shrink: 0; opacity: .75; }
+  .item[aria-current="page"] svg { color: var(--acc); opacity: 1; }
+  .item .n { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--suave); }
+  .item .n.alerta { padding: 0 7px; border-radius: 10px; background: var(--warn-f); color: var(--warn); }
+  .equipo-sel { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border: 1px solid var(--linea); border-radius: 10px; background: var(--caja); }
+  .equipo-sel select { width: 100%; }
+  .yo { display: flex; align-items: center; gap: 10px; padding: 10px 6px 0; border-top: 1px solid var(--linea); min-width: 0; }
+  .avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--hondo); border: 1px solid var(--linea); display: grid; place-items: center; font-size: 11px; font-weight: 600; flex-shrink: 0; }
+  .avatar.g { width: 44px; height: 44px; font-size: 15px; }
+  .contenido { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
+  .pagina { width: 100%; box-sizing: border-box; padding: 24px 32px 80px; display: flex; flex-direction: column; gap: 18px; }
+  .titulo-pag { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+  .titulo-pag h1 { margin: 2px 0 0; font-size: 22px; line-height: 28px; font-weight: 600; letter-spacing: -0.01em; }
+  .titulo-pag p { margin: 4px 0 0; color: var(--suave); max-width: 860px; }
+  .barra { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .filtro { background: transparent; color: var(--suave); border: 1px solid var(--linea); border-radius: 16px; padding: 4px 12px; font-size: 13px; display: inline-flex; gap: 6px; align-items: center; }
+  .filtro[aria-pressed="true"] { background: var(--acc-f); color: var(--texto); border-color: var(--acc); }
+  .filtro .mono { font-size: 11px; opacity: .85; }
+  .pestanas { display: flex; gap: 4px; border-bottom: 1px solid var(--linea); }
+  .pestana { all: unset; cursor: pointer; padding: 8px 14px; color: var(--suave); border-bottom: 2px solid transparent; display: inline-flex; gap: 8px; align-items: center; }
+  .pestana[aria-selected="true"] { color: var(--texto); border-bottom-color: var(--acc); font-weight: 500; }
+  .pestana:focus-visible { outline: 2px solid var(--acc); }
+  .caja { background: var(--caja); border: 1px solid var(--linea); border-radius: 12px; }
+  .caja-cab { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 12px 16px; border-bottom: 1px solid var(--linea); }
+  .caja-cuerpo { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+  .kpi { background: var(--caja); border: 1px solid var(--linea); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; }
+  .kpi .v { font-size: 26px; font-weight: 600; letter-spacing: -0.02em; font-family: "IBM Plex Mono", monospace; }
+  .kpi .s { font-size: 12px; color: var(--suave); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 10px 12px; border-top: 1px solid var(--linea-2); vertical-align: top; }
+  th { background: var(--hondo); color: var(--tenue); font-weight: 500; font-size: 12px; border-top: 0; }
+  tr.clic { cursor: pointer; } tr.clic:hover td { background: var(--sel); } tr[aria-selected="true"] td { background: var(--acc-f); }
+  .tabla-caja { background: var(--caja); border: 1px solid var(--linea); border-radius: 12px; overflow: auto; }
+  .vacio { padding: 28px; text-align: center; color: var(--suave); }
+  .pr { background: var(--caja); border: 1px solid var(--linea); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+  .pr-cab { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .pr-cab .repo { font-family: "IBM Plex Mono", monospace; font-size: 13px; }
+  .pr .tit { font-weight: 500; }
+  .pr .meta { font-size: 12px; color: var(--suave); display: flex; gap: 10px; flex-wrap: wrap; }
+  .pr .acciones { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .fallo { font-size: 12.5px; color: var(--bad-t); background: var(--bad-f); border-radius: 8px; padding: 8px 10px; overflow-wrap: anywhere; }
+  .dos { display: grid; grid-template-columns: minmax(280px, 380px) minmax(0, 1fr); gap: 16px; align-items: start; }
+  .lista-prs { display: flex; flex-direction: column; gap: 8px; }
+  .lista-prs .fila-pr { all: unset; box-sizing: border-box; cursor: pointer; display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border: 1px solid var(--linea); border-radius: 10px; background: var(--caja); }
+  .lista-prs .fila-pr[aria-current="true"] { border-color: var(--acc); background: var(--acc-f); }
+  .lista-prs .fila-pr:focus-visible { outline: 2px solid var(--acc); }
+  .acordeon { display: flex; flex-direction: column; gap: 8px; }
+  .rama-cab { all: unset; box-sizing: border-box; width: 100%; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--linea); border-radius: 10px; background: var(--hondo); }
+  .rama-cab:focus-visible { outline: 2px solid var(--acc); }
+  .rama-cab svg { transition: transform .15s ease-out; }
+  .rama-cab[aria-expanded="false"] svg { transform: rotate(-90deg); }
+  .rama-cab .nom { font-family: "IBM Plex Mono", monospace; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
+  .rama-cuerpo { display: flex; flex-direction: column; gap: 6px; padding: 6px 0 4px 18px; }
+  .hermano { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--linea-2); }
+  .hermano.actual { border-color: var(--acc); }
+  .hermano .nota { font-size: 12px; color: var(--suave); }
+  .puertas { display: flex; flex-direction: column; gap: 6px; }
+  .puerta { display: grid; grid-template-columns: 110px auto 1fr; gap: 10px; align-items: start; font-size: 13px; padding: 6px 0; border-top: 1px solid var(--linea-2); }
+  .puerta:first-child { border-top: 0; }
+  .barras { display: flex; flex-direction: column; gap: 8px; }
+  .barra-h { display: grid; grid-template-columns: 160px 1fr 40px; gap: 10px; align-items: center; font-size: 13px; }
+  .barra-h .pista { height: 8px; border-radius: 4px; background: var(--hondo); overflow: hidden; }
+  .barra-h .relleno { height: 100%; background: var(--acc); border-radius: 4px; }
+  .barra-h .relleno.eq { background: var(--linea-3); }
+  .met-sec { display: flex; flex-direction: column; gap: 12px; }
+  .met-sec h2 { margin: 0; font-size: 16px; font-weight: 600; }
+  .met-sec p { margin: 2px 0 0; font-size: 13px; }
+  .met-barras { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; align-items: start; }
+  .met-barras .barra-h { grid-template-columns: minmax(110px, 190px) 1fr minmax(44px, auto); }
+  th.num, td.num { text-align: right; white-space: nowrap; }
+  td.nom { white-space: nowrap; }
+  th button.orden { all: unset; cursor: pointer; white-space: nowrap; }
+  th button.orden:hover { color: var(--texto); }
+  th button.orden:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+  .pestanas { overflow-x: auto; }
+  .pestana { white-space: nowrap; }
+  .campo { display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+  .campo > span { color: var(--tenue); font-size: 12px; }
+  .en-linea { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .en-linea > input { flex: 1 1 180px; min-width: 0; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip .x { all: unset; cursor: pointer; padding: 0 2px; color: var(--tenue); }
+  .chip .x:hover { color: var(--bad); }
+  .token-nuevo { font-family: "IBM Plex Mono", monospace; font-size: 12px; background: var(--hondo); border: 1px dashed var(--acc); border-radius: 8px; padding: 8px 10px; overflow-wrap: anywhere; }
+  td.regla-celda button { all: unset; cursor: pointer; padding: 2px 6px; border-radius: 6px; }
+  td.regla-celda button:hover { background: var(--sel); }
+  td.regla-celda button:focus-visible { outline: 2px solid var(--acc); }
+  .hereda { color: var(--tenue); }
+  .pie { font-size: 12px; color: var(--tenue); }
+  .ep { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+  .ep-equipos { flex: 1 1 220px; max-width: 270px; display: flex; flex-direction: column; gap: 6px; }
+  .ep-eq { all: unset; box-sizing: border-box; width: 100%; cursor: pointer; display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; border-radius: 10px; background: var(--caja); border: 1px solid var(--linea); }
+  .ep-eq:hover { border-color: var(--linea-3); }
+  .ep-eq[aria-current="true"] { background: var(--sel); border-color: var(--acc); }
+  .ep-eq:focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+  .ep-eq-cab { display: flex; align-items: center; gap: 8px; } .ep-eq-cab b { font-weight: 600; font-size: 15px; } .ep-eq-cab .mono { margin-left: auto; font-size: 12px; }
+  .ep-centro { flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+  .ep-cfg { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; padding: 16px 18px; }
+  .ep-cfg .campo { flex: 1 1 180px; min-width: 0; } .ep-cfg .campo input, .ep-cfg .campo select { width: 100%; }
+  .ep-cfg-nom { flex: 1 1 160px; display: flex; flex-direction: column; gap: 2px; } .ep-cfg-nom h2 { margin: 0; font-size: 22px; line-height: 28px; font-weight: 600; }
+  .ep-cfg-pie { flex: 1 1 100%; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .ep-persona { display: flex; align-items: center; gap: 10px; }
+  .ep-tu { font-size: 10.5px; padding: 0 6px; border-radius: 6px; }
+  .ep-cajon { flex: 1 1 340px; max-width: 430px; position: sticky; top: 16px; background: var(--hondo); border: 1px solid var(--linea); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+  .ep-cajon .campo input, .ep-cajon .campo select { width: 100%; }
+  .ep-cajon-cab { display: flex; align-items: flex-start; gap: 10px; }
+  .ep-x { padding: 6px; }
+  .ep-rol { padding: 7px 12px; border-radius: 8px; border: 1px solid var(--linea); background: transparent; color: var(--suave); font-size: 13px; }
+  .ep-rol[aria-checked="true"] { background: var(--acc-f); color: var(--texto); border-color: var(--acc); }
+  .ep-chip { padding: 3px 4px 3px 10px; font-size: 12.5px; color: var(--texto); }
+  .ep-chip .x { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 10px; }
+  .ep-mas { border-style: dashed; border-radius: 999px; }
+  .ep-acceso { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 10px; background: var(--caja); border: 1px solid var(--linea-2); }
+  .ep .tabla-caja table { min-width: 760px; }
+  #toasts { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); z-index: 60; display: flex; flex-direction: column; align-items: center; gap: 8px; width: min(460px, calc(100vw - 32px)); pointer-events: none; }
+  .toast { pointer-events: auto; width: 100%; display: flex; align-items: flex-start; gap: 12px; padding: 14px 14px 14px 16px; border-radius: 12px; background: var(--caja); color: var(--texto); border: 1px solid var(--linea-3); border-left: 4px solid var(--t-color, var(--acc)); box-shadow: 0 12px 32px rgba(0,0,0,.28); animation: toast-baja .32s cubic-bezier(.2,.9,.3,1.2) both; }
+  .toast.sale { animation: toast-sube .22s ease-in both; }
+  .toast.t-ok { --t-color: var(--ok); } .toast.t-bad { --t-color: var(--bad); } .toast.t-warn { --t-color: var(--warn); } .toast.t-trabajando, .toast.t-info { --t-color: var(--acc); }
+  .toast .t-ico { flex-shrink: 0; width: 26px; height: 26px; border-radius: 13px; display: flex; align-items: center; justify-content: center; background: color-mix(in srgb, var(--t-color) 18%, transparent); color: var(--t-color); font-weight: 700; font-size: 14px; }
+  .toast .t-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .toast .t-tit { font-weight: 600; font-size: 14.5px; }
+  .toast .t-msg { font-size: 13.5px; color: var(--suave); overflow-wrap: anywhere; }
+  .toast .t-cerrar { all: unset; cursor: pointer; color: var(--tenue); padding: 2px 6px; border-radius: 6px; font-size: 16px; line-height: 1; }
+  .toast .t-giro { width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: toast-gira .8s linear infinite; }
+  @keyframes toast-baja { from { opacity: 0; transform: translateY(-120%); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes toast-sube { to { opacity: 0; transform: translateY(-60%); } }
+  @keyframes toast-gira { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .toast, .toast.sale, .toast .t-giro { animation: none; } }
+  .cargando { padding: 40px; text-align: center; color: var(--suave); }
+  @media (max-width: 900px) {
+    .app { flex-direction: column; }
+    nav.lado { position: static; height: auto; flex: none; width: 100%; border-right: 0; border-bottom: 1px solid var(--linea); padding: 12px 16px; }
+    .pagina { padding: 18px 16px 60px; }
+    .dos { grid-template-columns: 1fr; }
+    .ep-equipos { max-width: none; flex-direction: row; overflow-x: auto; } .ep-eq { min-width: 200px; } .ep-cajon { max-width: none; position: static; }
+    .barra-h { grid-template-columns: 110px 1fr 36px; }
+  }
+</style>
+</head>
+<body>
+<div id="toasts" role="status" aria-live="polite"></div>
+<div id="app"><div class="cargando">Cargando Hodor Supervisor…</div></div>
+<script>
+const CLAVE = "__CLAVE__", VERSION = "__VERSION__";
+const RAMAS = [["development", "development"], ["master", "master"], ["release", "release"]];
+const ROLES = [["lider", "Aprobador Pro", "Hodor Supervisor Pro"], ["aprobador", "Aprobador", "Hodor Supervisor"], ["desarrollador", "Desarrollador", "Hodor Worker (sin supervisor)"]];
+const TEMAS = [["oscuro", "Oscuro"], ["claro", "Claro"]];
+const S = { yo: null, estado: null, tab: "", tema: "oscuro", equipo: "", dias: 30, diasApr: 30, sub: "por", prodVista: "listos", sel: "", abiertos: new Set(["release"]),
+  datos: {}, cargado: {}, fallos: {}, aprobando: {}, ed: null, tokenNuevo: null, editRegla: null, nuevaExc: null, nuevoEquipo: false, ficha: null, fichaDe: "",
+  busca: "", filtroRol: "", eqSel: "", agregandoAprueba: false, programar: false, staging: false, error: "", metTab: "resumen", orden: {} };
+
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const ahora = () => Date.now() / 1000;
+function hace(ts) { const d = dura(ts); return d ? `hace ${d}` : ""; }
+function dura(ts) { ts = Number(ts || 0); if (!ts) return ""; const s = ahora() - ts; if (s < 3600) return `${Math.max(1, Math.round(s / 60))} min`; if (s < 86400) return `${Math.round(s / 3600)} h`; return `${Math.round(s / 86400)} d`; }
+function fecha(ts) { ts = Number(ts || 0); return ts ? new Date(ts * 1000).toLocaleString("es-CO", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : ""; }
+function diaInput(ts) { ts = Number(ts || 0); if (!ts) return ""; const d = new Date(ts * 1000); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; }
+function desdeInput(v, fin) { if (!v) return 0; const [y, m, d] = v.split("-").map(Number); return new Date(y, m - 1, d, fin ? 23 : 0, fin ? 59 : 0, 0).getTime() / 1000; }
+const ini = (n) => String(n || "").split(/[\s@._-]+/).filter(Boolean).slice(0, 2).map((p) => p[0].toUpperCase()).join("");
+const nombre = (c) => String(c || "").split("@")[0].split(/[._]/).map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(" ");
+const pro = () => !!S.yo && S.yo.edicion === "pro";
+const jira = (hu) => hu ? `https://global66.atlassian.net/browse/${encodeURIComponent(hu)}` : "";
+
+const ic = (d, extra) => `<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"${extra || ""}>${d}</svg>`;
+const CHEVRON = ic(`<path d="m6 9 6 6 6-6"></path>`);
+const I_EXTERNO = ic(`<path d="M7 17 17 7M8 7h9v9"></path>`, ` width="12" height="12"`);
+const I_INICIO = ic(`<path d="M3 11 12 4l9 7"></path><path d="M5 10v10h14V10"></path>`);
+const I_EQUIPOS = ic(`<circle cx="9" cy="8" r="3"></circle><path d="M3 20a6 6 0 0 1 12 0"></path><circle cx="17" cy="9" r="2.5"></circle><path d="M15.5 14.2A5 5 0 0 1 21 19"></path>`);
+const I_METRICAS = ic(`<path d="M4 20V10"></path><path d="M10 20V4"></path><path d="M16 20v-7"></path><path d="M22 20H2"></path>`);
+const I_PRS = ic(`<circle cx="6" cy="6" r="2.2"></circle><circle cx="6" cy="18" r="2.2"></circle><circle cx="18" cy="18" r="2.2"></circle><path d="M6 8.2v7.6"></path><path d="M18 15.8V11a3 3 0 0 0-3-3h-4"></path><path d="m13 6-2 2 2 2"></path>`);
+const I_REGLAS = ic(`<path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"></path><path d="M5 17a3 3 0 0 1 3-3h11"></path><path d="M9 8h6"></path>`);
+const I_APROBAR = ic(`<path d="M9 12l2 2 4-4"></path><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"></path>`);
+const I_HISTORIAL = ic(`<path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path>`);
+const I_AJUSTES = ic(`<circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"></path>`);
+const I_ACTUALIZAR = ic(`<path d="M12 3v12"></path><path d="m7 10 5 5 5-5"></path><path d="M5 21h14"></path>`);
+const I_TEMA = ic(`<circle cx="12" cy="12" r="9"></circle><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"></path>`);
+const I_RECARGAR = ic(`<path d="M3 12a9 9 0 0 1 15.4-6.4L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-15.4 6.4L3 16"></path><path d="M3 21v-5h5"></path>`);
+const externo = (url, texto, cls) => url ? `<a ${cls ? `class="${cls}"` : ""} href="${esc(url)}" target="_blank" rel="noopener">${texto} ${I_EXTERNO}<span class="sr"> (abre en otra pestaña)</span></a>` : texto;
+
+const TOAST = { ok: ["✓", "Listo"], bad: ["!", "No se pudo"], warn: ["!", "Atención"], info: ["i", "Aviso"], trabajando: ["", "Un momento"] };
+function cerrarToast(el) { if (!el || el.classList.contains("sale")) return; clearTimeout(el._t); el.classList.add("sale"); setTimeout(() => el.remove(), 230); }
+function aviso(t, tipo) {
+  const caja = document.getElementById("toasts");
+  tipo = tipo || (/…$/.test(t) ? "trabajando" : "ok");
+  caja.querySelectorAll(".toast.t-trabajando").forEach(cerrarToast);
+  const [icono, titulo] = TOAST[tipo] || TOAST.info;
+  const el = document.createElement("div");
+  el.className = `toast t-${tipo}`;
+  if (tipo === "bad") el.setAttribute("role", "alert");
+  el.innerHTML = `<span class="t-ico" aria-hidden="true">${tipo === "trabajando" ? `<span class="t-giro"></span>` : icono}</span><span class="t-txt"><span class="t-tit">${titulo}</span><span class="t-msg"></span></span><button type="button" class="t-cerrar" aria-label="Cerrar aviso">×</button>`;
+  el.querySelector(".t-msg").textContent = String(t || "");
+  el.querySelector(".t-cerrar").addEventListener("click", () => cerrarToast(el));
+  caja.prepend(el);
+  [...caja.querySelectorAll(".toast:not(.sale)")].slice(3).forEach(cerrarToast);
+  el._t = setTimeout(() => cerrarToast(el), tipo === "trabajando" ? 60000 : tipo === "bad" ? 9000 : 4500);
+}
+
+async function api(ruta, cuerpo) {
+  let r;
+  try {
+    r = await fetch(ruta, { method: cuerpo ? "POST" : "GET", headers: { "X-Panel": CLAVE, "Content-Type": "application/json" }, body: cuerpo ? JSON.stringify(cuerpo) : undefined });
+  } catch { return { error: "No pude hablar con el servidor local de Hodor Supervisor.", status: 0 }; }
+  let datos = {};
+  try { datos = await r.json(); } catch { datos = { error: `respuesta inválida (${r.status})` }; }
+  if (r.status === 403 && datos.error === "solo desde el panel") {
+    let ultima = 0;
+    try { ultima = Number(sessionStorage.getItem("recarga-clave") || 0); } catch { /* sin storage */ }
+    if (Date.now() - ultima > 10000) { try { sessionStorage.setItem("recarga-clave", String(Date.now())); } catch { /* sin storage */ } location.reload(); return new Promise(() => {}); }
+  }
+  if (!r.ok && !datos.error) datos.error = `error ${r.status}`;
+  if (!r.ok) datos.status = r.status;
+  return datos;
+}
+
+function leerTema() {
+  try { const t = localStorage.getItem("hodor-tema"); if (t === "claro" || t === "oscuro") return t; } catch { /* sin almacenamiento */ }
+  try { return matchMedia("(prefers-color-scheme: light)").matches ? "claro" : "oscuro"; } catch { return "oscuro"; }
+}
+function aplicarTema(t) { S.tema = t; document.documentElement.setAttribute("data-theme", t); try { localStorage.setItem("hodor-tema", t); } catch { /* sin almacenamiento */ } }
+
+const MENU_SUP = [["por-aprobar", "Por aprobar", I_APROBAR], ["historial", "Historial", I_HISTORIAL]];
+const MENU_PRO = [["inicio", "Inicio", I_INICIO], ["equipos", "Equipos y personas", I_EQUIPOS], ["metricas", "Métricas", I_METRICAS],
+  ["prs-a-prod", "PRs a Prod", I_PRS], ["reglas", "Reglas", I_REGLAS]];
+const RUTAS_VIEJAS = { personas: "equipos", roles: "equipos" };
+function menu() { return pro() ? MENU_PRO : MENU_SUP; }
+function tabDeRuta() {
+  const p = location.pathname.replace(/^\/+/, "").replace(/\/+$/, "");
+  if (p === "ajustes") return "ajustes";
+  const ok = menu().map((m) => m[0]);
+  if (pro() && RUTAS_VIEJAS[p]) return RUTAS_VIEJAS[p];
+  return ok.includes(p) ? p : ok[0];
+}
+function ir(tab, reemplazar) {
+  S.tab = tab;
+  const url = `/${tab}`;
+  if (location.pathname !== url) history[reemplazar ? "replaceState" : "pushState"]({}, "", url);
+  pintar();
+  cargarTab();
+}
+
+function lado() {
+  const yo = S.yo || {};
+  const listos = ((S.datos.prod || {}).items || []).filter((x) => x.listo).length;
+  const items = menu().map(([k, l, i]) => {
+    const n = (k === "por-aprobar" || k === "prs-a-prod") && listos ? `<span class="n alerta">${listos}</span>` : "";
+    return `<li><button class="item" data-tab="${k}" ${S.tab === k ? `aria-current="page"` : ""}>${i}<span style="flex-grow:1">${l}</span>${n}</button></li>`;
+  }).join("");
+  const equipos = (S.datos.equipos || {}).equipos || [];
+  const selector = pro() ? "" : `<div class="equipo-sel"><span class="rot">Tu equipo</span><b style="font-weight:600">${esc(yo.equipo || "—")}</b><span class="tenue" style="font-size:12px">Asignado al darte acceso</span></div>`;
+  const temaNombre = (TEMAS.find((t) => t[0] === S.tema) || TEMAS[0])[1];
+  return `<nav class="lado" aria-label="Navegación">
+    <div class="marca"><span class="logo" aria-hidden="true">H</span><span style="display:flex;flex-direction:column"><b style="font-weight:600">Hodor</b><span class="mono" style="font-size:11px;color:var(--tenue)">${pro() ? "Supervisor Pro" : "Supervisor"}</span></span></div>
+    ${selector}
+    <ul class="menu-lado">${items}</ul>
+    <span style="flex-grow:1"></span>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <ul class="menu-lado">
+        <li><button class="item" data-tab="ajustes" ${S.tab === "ajustes" ? `aria-current="page"` : ""}>${I_AJUSTES}<span style="flex-grow:1">Ajustes</span></button></li>
+        <li><button class="item" data-accion="actualizar">${I_ACTUALIZAR}<span style="flex-grow:1">Buscar actualización</span></button></li>
+        <li><button class="item" data-accion="tema" aria-label="Tema: ${temaNombre}. Cambiar tema">${I_TEMA}<span style="flex-grow:1">Tema</span><span class="mono" style="font-size:11px;color:var(--tenue)">${temaNombre.toLowerCase()}</span></button></li>
+      </ul>
+      <div class="yo"><span class="avatar" aria-hidden="true">${esc(ini(yo.nombre))}</span><span style="display:flex;flex-direction:column;min-width:0"><span style="font-weight:500;font-size:13px">${esc(yo.nombre || "")}</span><span style="font-size:11px;color:var(--tenue)">${esc(rolTexto(yo.rol))}</span><span class="mono" style="font-size:11px;color:var(--tenue)">${esc(VERSION)}</span></span></div>
+    </div>
+  </nav>`;
+}
+function rolTexto(r) { return r === "admin" ? "Aprobador" : r === "dueno" ? "Aprobador" : ((ROLES.find((x) => x[0] === r) || [])[1] || ""); }
+
+function cabecera(rot, titulo, bajada, derecha) {
+  return `<div class="titulo-pag"><div style="flex:1;min-width:260px"><div class="rot">${rot}</div><h1>${titulo}</h1>${bajada ? `<p>${bajada}</p>` : ""}</div>${derecha || ""}</div>`;
+}
+const recargar = (k) => `<button class="btn fant chico" data-recargar="${k}">${I_RECARGAR} Recargar</button>`;
+const cargando = () => `<div class="cargando">Cargando…</div>`;
+function errorDe(k) { const d = S.datos[k]; return d && d.error ? `<div class="fallo">${esc(d.error)}</div>` : ""; }
+
+function chipPuerta(estado) { return { ok: "c-ok", na: "c-off", warn: "c-warn", bad: "c-bad", acc: "c-acc", off: "c-off" }[estado] || "c-off"; }
+function chipEstado(e) { return { mergeado: "c-ok", abierto: "c-acc", cerrado: "c-off" }[e] || "c-off"; }
+function puntajeIa(x) { const g = (x.puertas || []).find((p) => p.k === "ia"); return g ? g.t : ""; }
+
+function hermanoHtml(c) {
+  const nota = [c.rondas ? `${c.rondas} ${c.rondas === 1 ? "ronda" : "rondas"}` : "sin análisis", c.puntaje != null ? `IA ${c.puntaje}` : "", c.rev ? `rev ${c.rev}` : ""].filter(Boolean).join(" · ");
+  return `<div class="hermano${c.actual ? " actual" : ""}"><span class="mono">${externo(c.url, `#${esc(c.pr)}`)}</span><span style="flex:1;min-width:160px">${esc(c.titulo || c.rama || "")}${c.actual ? ` <span class="chip c-acc">este</span>` : ""}</span><span class="nota">${esc(nota)}</span><span class="chip ${chipEstado(c.estado)}">${esc(c.estado)}</span></div>`;
+}
+function cadenaHtml(x) {
+  const c = x.cadena || {};
+  return `<div class="acordeon">${RAMAS.map(([k, n]) => {
+    const prs = c[k] || [];
+    const abierto = S.abiertos.has(`${x.pr}:${k}`) || (S.abiertos.has(k) && !S.abiertos.has(`${x.pr}:${k}:cerrado`));
+    const merg = prs.filter((p) => p.mergeado).length, abiertos = prs.filter((p) => p.estado === "abierto").length;
+    const resumen = prs.length ? [`${prs.length} PR${prs.length === 1 ? "" : "s"}`, merg ? `${merg} mergeado${merg === 1 ? "" : "s"}` : "", abiertos ? `${abiertos} abierto${abiertos === 1 ? "" : "s"}` : ""].filter(Boolean).join(" · ") : "sin PRs";
+    return `<div><button class="rama-cab" data-rama="${esc(x.pr)}:${k}" aria-expanded="${abierto}">${CHEVRON}<span class="nom">${n}</span><span class="chip c-off mono">${prs.length}</span><span class="tenue" style="font-size:12px">${esc(resumen)}</span></button>${abierto ? `<div class="rama-cuerpo">${prs.length ? prs.map(hermanoHtml).join("") : `<span class="tenue" style="font-size:12px">La historia no tiene PRs a ${n} en este repo.</span>`}</div>` : ""}</div>`;
+  }).join("")}</div>`;
+}
+function puertasHtml(x) {
+  return `<div class="puertas">${(x.puertas || []).map((g) => `<div class="puerta"><span class="mono" style="font-size:12px">${esc(g.k)}</span><span class="chip ${chipPuerta(g.estado)}">${esc(g.t)}</span><span class="suave" style="font-size:12.5px">${esc(g.ayuda || "")}</span></div>`).join("") || `<span class="tenue">Sin puertas calculadas todavía.</span>`}</div>`;
+}
+function botonAprobar(x, chico) {
+  const f = S.fallos[x.pr];
+  const corriendo = S.aprobando[x.pr];
+  return `<button class="btn prim${chico ? " chico" : ""}" data-aprobar="${esc(x.pr)}" data-repo="${esc(x.repo)}" ${corriendo || !x.listo ? "disabled" : ""}>${corriendo ? "Aprobando…" : `Aprobar #${esc(x.pr)}`}</button>${f ? externo(f.url || x.url, "Abrir en CodeCommit", "btn") : ""}`;
+}
+function falloHtml(x) { const f = S.fallos[x.pr]; return f ? `<div class="fallo">AWS no dejó aprobar: ${esc(f.motivo)}</div>` : ""; }
+
+function vistaPorAprobar() {
+  const yo = S.yo || {}, d = S.datos.prod;
+  const primero = String(yo.nombre || "").split(" ")[0];
+  const devs = (yo.devs || []).map((x) => x.nombre);
+  const items = ((d || {}).items || []).filter((x) => x.listo);
+  const apr = (S.datos.aprobados || {}).items || [];
+  const filtroDias = (x) => !S.diasApr || (ahora() - Number(x.en || 0)) < S.diasApr * 86400;
+  const aprVisibles = apr.filter(filtroDias);
+  const lista = S.sub === "por"
+    ? (d ? (items.length ? items.map((x) => `<article class="pr">
+        <div class="pr-cab"><span class="repo">${externo(x.url, `${esc(x.repo)} #${esc(x.pr)}`)}</span>${x.hu ? externo(jira(x.hu), esc(x.hu)) : ""}<span class="chip c-ok">Listo${puntajeIa(x) ? ` · IA ${esc(puntajeIa(x))}` : ""}</span><span style="flex:1"></span><span class="tenue" style="font-size:12px">${esc([x.dev, hace(x.enviado_en || x.creado)].filter(Boolean).join(" · "))}</span></div>
+        ${x.titulo ? `<div class="tit">${esc(x.titulo)}</div>` : ""}
+        <div class="meta">${["development", "master"].map((k) => { const p = ((x.cadena || {})[k] || []).slice(-1)[0]; return `<span>${k} · ${p ? `<span class="mono">#${esc(p.pr)}</span> ${esc(p.estado)}` : "—"}</span>`; }).join("")}</div>
+        ${falloHtml(x)}
+        <div class="acciones">${botonAprobar(x)}<button class="btn fant" data-ver-cadena="${esc(x.pr)}" aria-expanded="${S.sel === x.pr}">${S.sel === x.pr ? "Ocultar cadena" : "Ver cadena y puertas"}</button></div>
+        ${S.sel === x.pr ? `<div style="display:grid;gap:12px"><div class="rot">Cadena de la historia</div>${cadenaHtml(x)}<div class="rot">Puertas</div>${puertasHtml(x)}</div>` : ""}
+      </article>`).join("") : `<div class="caja vacio">No tienes PRs a producción listos para aprobar. Cuando un PR de tus devs pase sus 5 puertas, aparece aquí.</div>`) : cargando())
+    : (S.datos.aprobados ? (aprVisibles.length ? `<div class="tabla-caja"><table><thead><tr><th>PR</th><th>Historia</th><th>Dev</th><th>Aprobado</th></tr></thead><tbody>${aprVisibles.map((x) => `<tr><td class="mono">${externo(x.url, `${esc(x.repo)} #${esc(x.pr)}`)}</td><td>${x.hu ? externo(jira(x.hu), esc(x.hu)) : "—"} <span class="suave">${esc(x.titulo)}</span></td><td>${esc(x.dev)}</td><td>${esc(fecha(x.en))}</td></tr>`).join("")}</tbody></table></div>` : `<div class="caja vacio">No aprobaste PRs en este periodo.</div>`) : cargando());
+  return `<div class="pagina">
+    ${cabecera(`Mi equipo · ${esc(yo.equipo || "—")}`, `Hola, ${esc(primero)}. Esto está listo para que lo apruebes`,
+      `Solo te llegan PRs a producción que ya pasaron todas sus puertas, de los devs que tienes asignados${devs.length ? `: ${esc(devs.join(", "))}` : ""}. Apruebas con tu usuario de AWS.`, recargar("prod"))}
+    ${errorDe("prod")}
+    <div class="pestanas" role="tablist"><button class="pestana" role="tab" data-sub="por" aria-selected="${S.sub === "por"}">Por aprobar <span class="chip c-off mono">${items.length}</span></button><button class="pestana" role="tab" data-sub="apr" aria-selected="${S.sub === "apr"}">Aprobados <span class="chip c-off mono">${aprVisibles.length}</span></button></div>
+    ${S.sub === "apr" ? `<div class="barra" role="group" aria-label="Periodo">${[[1, "Hoy"], [7, "7 días"], [30, "30 días"]].map(([n, l]) => `<button class="filtro" data-dias-apr="${n}" aria-pressed="${S.diasApr === n}">${l}</button>`).join("")}</div>` : ""}
+    <div class="lista-prs" style="gap:12px">${lista}</div>
+    <p class="pie">¿Algo no cuadra? Escríbele al revisor.</p>
+  </div>`;
+}
+
+function vistaHistorial() {
+  const d = S.datos.aprobados;
+  const items = (d || {}).items || [];
+  return `<div class="pagina">${cabecera("Historial", "Lo que aprobaste", `PRs a producción que aprobaste en los últimos ${(d || {}).dias || 30} días.`, recargar("aprobados"))}
+    ${errorDe("aprobados")}
+    ${d ? (items.length ? `<div class="tabla-caja"><table><thead><tr><th>PR</th><th>Historia</th><th>Dev</th><th>Cuándo</th></tr></thead><tbody>${items.map((x) => `<tr><td class="mono">${externo(x.url, `${esc(x.repo)} #${esc(x.pr)}`)}</td><td>${x.hu ? externo(jira(x.hu), esc(x.hu)) : "—"} <span class="suave">${esc(x.titulo)}</span></td><td>${esc(x.dev)}</td><td>${esc(fecha(x.en))}</td></tr>`).join("")}</tbody></table></div>` : `<div class="caja vacio">Todavía no hay aprobaciones registradas.</div>`) : cargando()}
+  </div>`;
+}
+
+const pct = (v) => v == null ? "—" : `${v} %`;
+function vistaInicio() {
+  const m = S.datos.metricas, p = S.datos.prod;
+  const eqs = (m || {}).equipos || [];
+  const listos = ((p || {}).items || []).filter((x) => x.listo);
+  const puntajes = eqs.map((e) => e.puntaje).filter((x) => x != null);
+  const kpis = [["Equipos", eqs.length, "configurados"], ["Personas", (m || {}).personas ?? "—", "con rol asignado"], ["Listos a prod", listos.length, "5 puertas en verde"],
+    ["Puntaje IA", puntajes.length ? Math.round(puntajes.reduce((a, b) => a + b, 0) / puntajes.length) : "—", `promedio · ${(m || {}).dias || S.dias} días`]];
+  return `<div class="pagina">
+    ${cabecera(`Inicio · todos los equipos`, "Cómo van los equipos", `Todo sale de los PRs, sus análisis y sus aprobaciones de los últimos ${S.dias} días.`, `<div class="barra">${[7, 30, 56].map((n) => `<button class="filtro" data-dias="${n}" aria-pressed="${S.dias === n}">${n} días</button>`).join("")}${recargar("metricas")}</div>`)}
+    ${errorDe("metricas")}
+    <div class="kpis">${kpis.map(([r, v, s]) => `<div class="kpi"><span class="rot">${r}</span><span class="v">${esc(v)}</span><span class="s">${esc(s)}</span></div>`).join("")}</div>
+    <div class="tabla-caja"><div class="caja-cab"><b style="font-weight:600">Equipos</b><span class="tenue" style="font-size:12px">Clic en un equipo para ver sus métricas</span></div>
+      ${m ? (eqs.length ? `<table><thead><tr><th>Equipo</th><th>Aprobadores</th><th>Devs</th><th>Rebote</th><th>Pivote</th><th>PR Staging</th><th>Puntaje IA</th><th>Aprobaciones</th></tr></thead><tbody>${eqs.map((e) => `<tr class="clic" data-ir-equipo="${esc(e.equipo)}"><td><b style="font-weight:500">${esc(e.equipo)}</b></td><td>${e.aprobadores}</td><td>${e.devs}</td><td>${pct(e.rebote.pct)}</td><td>${pct(e.pivote.pct)} <span class="chip c-info">propuesta</span></td><td>${e.pr_staging && e.pr_staging.mediana_h != null ? `${e.pr_staging.mediana_h} h` : "—"}</td><td>${e.puntaje ?? "—"}</td><td>${e.aprobaciones.hodor} Hodor · ${e.aprobaciones.mano} a mano</td></tr>`).join("")}</tbody></table>` : `<div class="vacio">No hay equipos todavía. Créalos en Equipos.</div>`) : cargando()}
+    </div>
+    <div class="caja"><div class="caja-cab"><b style="font-weight:600">PRs a producción por aprobar</b><span style="flex:1"></span><button class="btn fant chico" data-tab="prs-a-prod">Ver todos</button></div>
+      <div class="caja-cuerpo">${p ? (listos.length ? listos.slice(0, 6).map((x) => `<div class="hermano"><span class="chip c-off">${esc(x.equipo || "sin equipo")}</span><span class="mono">${externo(x.url, `${esc(x.repo)} #${esc(x.pr)}`)}</span><span style="flex:1">${esc(x.hu || "")} · ${esc(x.dev)}</span><span class="tenue" style="font-size:12px">${esc(hace(x.enviado_en || x.creado))}</span></div>`).join("") : `<span class="tenue">Nada listo por ahora.</span>`) : cargando()}</div>
+    </div>
+  </div>`;
+}
+
+const SIN_EQUIPO = "__sin_equipo__";
+const QUE_HACE = {
+  dueno: "Eres tú: apruebas a todos los devs del equipo. No se edita aquí.",
+  lider: "Hodor Supervisor Pro: aprueba, ve todos los equipos y sus métricas, y configura equipos y personas.",
+  aprobador: "Hodor Supervisor: aprueba los PRs listos de los devs que le asignes.",
+  desarrollador: "Usa Hodor Worker. No entra al supervisor.",
+};
+const FILTROS_ROL = [["", "Todos"], ["aprob", "Aprobadores"], ["dev", "Desarrolladores"]];
+const accede = (r) => r === "lider" || r === "aprobador" || r === "dueno";
+function chipRol(r) { return { dueno: "c-ok", lider: "c-acc", aprobador: "c-ok" }[r] || "c-off"; }
+function personasTodas() { return (S.datos.personas || {}).personas || []; }
+function nombreDe(correo) { const p = personasTodas().find((x) => x.correo === correo); return (p && p.nombre) || nombre(correo); }
+function corto(correo) { return nombreDe(correo).split(" ")[0]; }
+function equipoElegido() {
+  const eqs = ((S.datos.equipos || {}).equipos || []).map((e) => e.nombre);
+  if (S.eqSel === SIN_EQUIPO && personasTodas().some((p) => !p.equipo && !p.virtual)) return SIN_EQUIPO;
+  if (eqs.includes(S.eqSel)) return S.eqSel;
+  return eqs.includes(S.equipo) ? S.equipo : eqs[0] || "";
+}
+function gentesDe(eq) { return personasTodas().filter((p) => (eq === SIN_EQUIPO ? !p.equipo && !p.virtual : p.equipo === eq)); }
+function textoAprueba(p) {
+  if (p.aprueba_todos) return "Todos";
+  if (!accede(p.rol)) return "—";
+  const n = (p.aprueba || []).length;
+  if (!n) return "nadie todavía";
+  return n <= 2 ? p.aprueba.map(corto).join(" · ") : `${n} devs`;
+}
+function textoLoAprueba(p) {
+  if (accede(p.rol)) return "—";
+  return (p.lo_aprueba || []).length ? p.lo_aprueba.map(corto).join(" · ") : "sin aprobador";
+}
+function textoAcceso(p) {
+  if (p.rol === "dueno") return "Todos";
+  if (!accede(p.rol)) return "Hodor Worker";
+  if (!p.tiene_token) return "sin token";
+  return `token activo · ${p.paquete_enviado ? `enviado ${hace(p.paquete_enviado)}` : "sin enviar"}`;
+}
+function vistaEquiposPersonas() {
+  if (S.fichaDe) return vistaFicha();
+  const d = S.datos.equipos, dp = S.datos.personas;
+  const cab = cabecera("Equipos y personas", "Equipos y personas", "Un solo lugar: creas equipos, agregas personas y a cada una le das su rol, a quién aprueba y su acceso.", `<div class="barra"><button class="btn" data-accion="nuevo-equipo">+ Nuevo equipo</button>${recargar("equipos")}</div>`);
+  if (!d || !dp) return `<div class="pagina">${cab}${errorDe("equipos")}${errorDe("personas")}${d && d.error || dp && dp.error ? "" : cargando()}</div>`;
+  const eqs = d.equipos || [];
+  const sel = equipoElegido();
+  const nuevo = S.nuevoEquipo ? `<div class="caja"><div class="caja-cuerpo"><div class="en-linea"><label class="sr" for="nuevo-equipo">Nombre del equipo</label><input id="nuevo-equipo" data-foco="nuevo-equipo" placeholder="Nombre del equipo"><button class="btn prim chico" data-accion="crear-equipo">Crear</button><button class="btn fant chico" data-accion="cancelar-equipo">Cancelar</button></div></div></div>` : "";
+  const item = (nombreEq, resumen, n) => `<button type="button" class="ep-eq" data-ep-equipo="${esc(nombreEq)}" aria-current="${sel === nombreEq}"><span class="ep-eq-cab"><b>${esc(nombreEq === SIN_EQUIPO ? "Sin equipo" : nombreEq)}</b><span class="mono tenue">${n}</span></span><span class="tenue" style="font-size:12.5px">${esc(resumen)}</span></button>`;
+  const lista = eqs.map((e) => {
+    const g = gentesDe(e.nombre), ap = g.filter((p) => accede(p.rol)).length, dv = g.length - ap;
+    return item(e.nombre, g.length ? `${ap} ${ap === 1 ? "aprobador" : "aprobadores"} · ${dv} ${dv === 1 ? "dev" : "devs"}${e.canal_efectivo ? ` · ${e.canal_efectivo}` : ""}` : "sin personas todavía", g.length);
+  }).join("") + (gentesDe(SIN_EQUIPO).length ? item(SIN_EQUIPO, "personas que sacaste de su equipo", gentesDe(SIN_EQUIPO).length) : "");
+  if (!sel) return `<div class="pagina">${cab}${errorDe("equipos")}${nuevo}<div class="caja vacio">No hay equipos. Crea el primero con «+ Nuevo equipo».</div></div>`;
+  const e = eqs.find((x) => x.nombre === sel);
+  const gente = gentesDe(sel);
+  const cfg = e ? `<section class="caja ep-cfg" aria-label="Configuración de ${esc(sel)}">
+      <div class="ep-cfg-nom"><span class="rot">Equipo</span><h2>${esc(sel)}</h2></div>
+      <label class="campo"><span>Canal de PRs a producción</span><input data-cfg="canal" value="${esc(e.canal)}" placeholder="${esc(d.canal_general || "#prs-a-prod")} (general)"></label>
+      <label class="campo"><span>Lista de Slack</span><input class="mono" data-cfg="lista_id" value="${esc(e.lista_id)}" placeholder="Lista general"></label>
+      <label class="campo"><span>Lo cubre si falta su aprobador</span><select data-cfg="cubre"><option value="">Nadie</option>${eqs.filter((o) => o.nombre !== sel).map((o) => `<option ${o.nombre === e.cubre ? "selected" : ""}>${esc(o.nombre)}</option>`).join("")}</select></label>
+      <div class="ep-cfg-pie"><span class="tenue" style="font-size:12px;flex:1;min-width:220px">Cuando un PR a release pasa sus 5 puertas, Hodor avisa en ${esc(e.canal_efectivo || "el canal")} una sola vez, nunca por DM. Una lista propia se crea a mano en Slack y se comparte al canal con acceso de escritura.</span>${gente.length ? "" : `<button class="btn peligro chico" data-borrar-equipo="${esc(sel)}">Borrar equipo</button>`}<button class="btn chico" data-probar-equipo="${esc(sel)}">Probar canal y lista</button><button class="btn prim chico" data-guardar-equipo="${esc(sel)}">Guardar</button></div>
+    </section>` : `<div class="caja"><div class="caja-cuerpo"><span class="suave">Personas sin equipo: no aprueban ni las aprueba nadie. Ábrelas para darles equipo o quitarlas de Hodor.</span></div></div>`;
+  const q = S.busca.trim().toLowerCase();
+  const filas = gente.filter((p) => (!q || `${p.nombre} ${p.correo}`.toLowerCase().includes(q)) && (!S.filtroRol || (S.filtroRol === "aprob" ? accede(p.rol) : !accede(p.rol))));
+  const yo = ((S.yo || {}).correo || "").toLowerCase();
+  const fila = (p) => {
+    const tu = p.tu || p.correo === yo;
+    return `<tr class="clic" data-ep-persona="${esc(p.correo)}" tabindex="0" aria-selected="${!!S.ed && S.ed.correo === p.correo}">
+      <td><span class="ep-persona"><span class="avatar" aria-hidden="true">${esc(ini(p.nombre))}</span><span style="display:flex;flex-direction:column;min-width:0"><span><b style="font-weight:500">${esc(p.nombre)}</b>${tu ? ` <span class="chip c-acc mono ep-tu">tú</span>` : ""}</span><span class="tenue" style="font-size:12px">${esc(p.correo)}</span></span></span></td>
+      <td><span class="chip ${chipRol(p.rol)}">${esc(rolTexto(p.rol))}</span></td>
+      <td class="suave">${esc(textoAprueba(p))}</td>
+      <td class="${!accede(p.rol) && !(p.lo_aprueba || []).length ? "" : "suave"}" style="${!accede(p.rol) && !(p.lo_aprueba || []).length ? "color:var(--warn)" : ""}">${esc(textoLoAprueba(p))}</td>
+      <td class="mono tenue" style="font-size:12px">${esc(textoAcceso(p))}</td>
+      <td style="text-align:right"><button class="btn chico" data-ep-persona="${esc(p.correo)}" aria-label="${p.virtual ? "Ver" : "Editar"} a ${esc(p.nombre)}">${p.virtual ? "Ver" : "Editar"}</button></td></tr>`;
+  };
+  const tablaP = `<section class="tabla-caja" aria-label="Personas de ${esc(sel === SIN_EQUIPO ? "sin equipo" : sel)}">
+      <div class="caja-cab"><b style="font-weight:600;font-size:15px;flex:1">Personas de ${esc(sel === SIN_EQUIPO ? "ningún equipo" : sel)}</b>
+        <label class="sr" for="busca-persona">Buscar persona</label><input id="busca-persona" data-busca data-foco="busca" placeholder="Buscar persona" value="${esc(S.busca)}" style="width:200px">
+        <span class="barra" role="group" aria-label="Rol">${FILTROS_ROL.map(([k, l]) => `<button type="button" class="filtro" data-ep-filtro="${k}" aria-pressed="${S.filtroRol === k}">${l}</button>`).join("")}</span>
+        ${sel === SIN_EQUIPO ? "" : `<button class="btn prim chico" data-accion="ep-agregar">+ Agregar persona</button>`}</div>
+      <table><thead><tr><th>Persona</th><th>Rol</th><th>Aprueba a</th><th>Lo aprueba</th><th>Acceso</th><th><span class="sr">Acciones</span></th></tr></thead>
+      <tbody>${filas.map(fila).join("") || `<tr><td colspan="6" class="vacio">${gente.length ? "Nadie coincide." : "Sin personas todavía. Agrega la primera."}</td></tr>`}</tbody></table></section>`;
+  return `<div class="pagina">${cab}${errorDe("equipos")}${errorDe("personas")}${nuevo}
+    <div class="ep"><nav class="ep-equipos" aria-label="Equipos">${lista}</nav>
+      <div class="ep-centro">${cfg}${tablaP}</div>
+      ${S.ed ? cajonPersona(sel) : ""}</div></div>`;
+}
+function cajonPersona(sel) {
+  const e = S.ed;
+  const todas = personasTodas();
+  const actual = todas.find((p) => p.correo === e.correo) || {};
+  const eqNombre = e.equipo || (sel === SIN_EQUIPO ? "" : sel);
+  const cerrar = `<button type="button" class="btn fant chico ep-x" data-accion="ep-cerrar" aria-label="Cerrar">${ic(`<path d="M18 6 6 18M6 6l12 12"></path>`)}</button>`;
+  if (e.virtual) {
+    return `<aside class="ep-cajon" aria-label="Persona"><div class="ep-cajon-cab"><div style="flex:1;display:flex;flex-direction:column;gap:2px"><span class="rot">Aprobador de ${esc(eqNombre)}</span><b style="font-size:18px;font-weight:600">${esc(e.nombre)}</b><span class="tenue" style="font-size:12.5px">${esc(e.correo)}</span></div>${cerrar}</div>
+      <span class="chip c-ok" style="align-self:flex-start">Aprobador</span><span class="suave" style="font-size:13px">${esc(QUE_HACE.dueno)}</span>
+      <div class="en-linea"><button class="btn" data-accion="ep-cerrar">Cerrar</button></div></aside>`;
+  }
+  const devsEq = todas.filter((p) => p.equipo === eqNombre && !accede(p.rol) && p.correo !== e.correo);
+  const candidatos = devsEq.filter((p) => !e.aprueba.includes(p.correo));
+  const suplentes = todas.filter((p) => p.correo !== e.correo && accede(p.rol));
+  const tk = S.tokenNuevo && S.tokenNuevo.correo === e.correo ? S.tokenNuevo.token : "";
+  const ausenteYa = !!e.ausente_desde && e.ausente_desde <= ahora() && (!e.ausente_hasta || e.ausente_hasta >= ahora());
+  const programada = !!e.ausente_desde && e.ausente_desde > ahora();
+  const aprob = accede(e.rol);
+  return `<aside class="ep-cajon" aria-label="Persona">
+    <div class="ep-cajon-cab"><div style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0"><span class="rot">${e.nuevo ? `Nueva persona en ${esc(eqNombre)}` : `Persona de ${esc(eqNombre || "ningún equipo")}`}</span><b style="font-size:18px;font-weight:600">${esc(e.nuevo ? "Agregar persona" : e.nombre)}</b>${e.nuevo ? "" : `<span class="tenue" style="font-size:12.5px;overflow-wrap:anywhere">${esc(e.correo)}</span>`}</div>${cerrar}</div>
+    ${e.nuevo ? `<label class="campo"><span>Correo de Global66</span><input data-ed="correo" data-foco="ed-correo" type="email" autocomplete="off" value="${esc(e.correo)}" placeholder="nombre.apellido@global66.com"></label><span class="tenue" style="font-size:12px;margin-top:-8px">El nombre se completa solo desde Slack.</span>` : ""}
+    ${!e.nuevo && !e.equipo ? `<label class="campo"><span>Equipo</span><select data-ed="equipo"><option value="">Sin equipo</option>${((S.datos.equipos || {}).equipos || []).map((x) => `<option>${esc(x.nombre)}</option>`).join("")}</select></label>` : ""}
+    <div class="campo"><span>Rol</span><div class="en-linea" role="radiogroup" aria-label="Rol">${ROLES.map(([k, l]) => `<button type="button" class="ep-rol" role="radio" aria-checked="${e.rol === k}" data-ed-rol="${k}">${l}</button>`).join("")}</div><span class="tenue" style="font-size:12px">${esc(QUE_HACE[e.rol] || "")}</span></div>
+    ${aprob ? `<div class="campo"><span>Aprueba los PRs de</span><div class="chips">${e.aprueba.map((c) => `<span class="chip c-off ep-chip">${esc(nombreDe(c))}<button type="button" class="x" data-quitar-aprueba="${esc(c)}" aria-label="Quitar a ${esc(nombreDe(c))}">${ic(`<path d="M18 6 6 18M6 6l12 12"></path>`, ` width="11" height="11"`)}</button></span>`).join("")}
+        ${candidatos.length ? (S.agregandoAprueba ? `<label class="sr" for="agregar-aprueba">Agregar dev</label><select id="agregar-aprueba" data-agregar-aprueba><option value="">Elige un dev…</option>${candidatos.map((p) => `<option value="${esc(p.correo)}">${esc(p.nombre)}</option>`).join("")}</select>` : `<button type="button" class="btn chico ep-mas" data-accion="ep-agregar-aprueba">+ Agregar</button>`) : ""}
+        ${devsEq.length && candidatos.length ? `<button type="button" class="btn fant chico" style="color:var(--acc)" data-accion="ep-todos">Todos los devs del equipo</button>` : ""}</div>
+        ${!e.aprueba.length ? `<span class="tenue" style="font-size:12px">Nadie todavía: no le llega ningún PR.</span>` : ""}</div>
+      <label class="campo"><span>Suplente cuando no está</span><select data-ed="suplente"><option value="">Nadie</option>${suplentes.map((p) => `<option value="${esc(p.correo)}" ${e.suplente === p.correo ? "selected" : ""}>${esc(p.nombre)}</option>`).join("")}</select></label>
+      <label class="en-linea" style="cursor:pointer;font-size:13px"><input type="checkbox" data-ausente-ahora ${ausenteYa ? "checked" : ""} style="flex:none;width:16px;height:16px;accent-color:var(--prim)"> Ausente ahora</label>
+      ${S.programar || programada || (e.ausente_hasta && !ausenteYa) ? `<div class="en-linea"><label class="campo" style="flex:1"><span>Ausente desde</span><input type="date" data-ed-fecha="ausente_desde" value="${esc(diaInput(e.ausente_desde))}"></label><label class="campo" style="flex:1"><span>hasta</span><input type="date" data-ed-fecha="ausente_hasta" value="${esc(diaInput(e.ausente_hasta))}"></label></div>` : `<button type="button" class="btn fant chico" style="align-self:flex-start" data-accion="ep-programar">Programar ausencia</button>`}
+      ${e.nuevo ? "" : `<div class="ep-acceso"><span class="suave" style="font-size:12.5px">Acceso a Hodor Supervisor</span><span class="mono tenue" style="font-size:12.5px">${actual.tiene_token ? `${esc(actual.token)}${actual.token_creado ? ` · creado ${esc(hace(actual.token_creado))}` : ""}${actual.paquete_enviado ? ` · enviado ${esc(hace(actual.paquete_enviado))}` : " · sin enviar"}` : "Sin token: todavía no puede entrar."}</span>
+        ${tk ? `<div class="token-nuevo" aria-live="polite">${esc(tk)}</div><span class="tenue" style="font-size:12px">Cópialo ahora: no se vuelve a mostrar. Va en el config.json de su paquete.</span>` : ""}
+        <div class="en-linea"><button type="button" class="btn chico" data-accion="enviar-paquete">Enviar paquete y token por DM</button>${tk ? `<button type="button" class="btn chico" data-accion="copiar-token">Copiar</button>` : ""}${actual.tiene_token ? `<button type="button" class="btn peligro chico" data-accion="revocar-token">Revocar</button>` : `<button type="button" class="btn chico" data-accion="generar-token">Generar token</button>`}</div></div>`}` : ""}
+    <div class="en-linea" style="margin-top:4px"><button type="button" class="btn prim" data-accion="guardar-persona">${e.nuevo ? "Agregar al equipo" : "Guardar"}</button><button type="button" class="btn fant" data-accion="ep-cerrar">Cancelar</button><span style="flex:1"></span>
+      ${e.nuevo ? "" : `<button type="button" class="btn fant chico" data-ficha="${esc(e.correo)}">Ver ficha</button>`}
+      ${e.nuevo ? "" : e.equipo ? `<button type="button" class="btn fant chico" style="color:var(--bad)" data-accion="sacar-equipo">Sacar del equipo</button>` : `<button type="button" class="btn fant chico" style="color:var(--bad)" data-accion="borrar-persona">Quitar de Hodor</button>`}</div>
+    <span class="pie">Cada cambio queda registrado.</span>
+  </aside>`;
+}
+function abrirPersona(correo) {
+  const p = personasTodas().find((x) => x.correo === correo);
+  if (!p) return;
+  S.ed = { correo: p.correo, nombre: p.nombre, rol: p.rol, equipo: p.equipo, aprueba: [...(p.aprueba || [])], suplente: p.suplente || "", ausente_desde: p.ausente_desde || 0, ausente_hasta: p.ausente_hasta || 0, nuevo: false, virtual: !!p.virtual };
+  S.tokenNuevo = null; S.agregandoAprueba = false; S.programar = false;
+}
+function barrasComparadas(mias, equipo) {
+  const todas = [...new Set([...(mias || []).map((h) => h.categoria), ...((equipo || []).map((h) => h.categoria))])];
+  const max = Math.max(1, ...(mias || []).map((h) => h.n), ...((equipo || []).map((h) => h.n)));
+  if (!todas.length) return `<span class="tenue">Sin hallazgos en el periodo.</span>`;
+  const v = (l, c) => ((l || []).find((h) => h.categoria === c) || {}).n || 0;
+  return `<div class="barras">${todas.slice(0, 10).map((c) => `<div class="barra-h"><span>${esc(c)}</span><span style="display:flex;flex-direction:column;gap:3px"><span class="pista"><span class="relleno" style="width:${(100 * v(mias, c) / max).toFixed(0)}%;display:block"></span></span>${equipo ? `<span class="pista"><span class="relleno eq" style="width:${(100 * v(equipo, c) / max).toFixed(0)}%;display:block"></span></span>` : ""}</span><span class="mono">${v(mias, c)}</span></div>`).join("")}</div>`;
+}
+function kpisMetricas(m) {
+  const st = m.pr_staging;
+  return `<div class="kpis">${[["Rebote", pct(m.rebote.pct), `${m.rebote.n} de ${m.analizados} PRs analizados`], ["Pivote", pct(m.pivote.pct), `${m.pivote.n} de ${m.historias} historias · propuesta`],
+    ["PR Staging", st && st.mediana_h != null ? `${st.mediana_h} h` : "—", st ? (st.disponible ? `mediana · ${st.n} pasos` : st.motivo) : "actívalo arriba (Jira)"],
+    ["Puntaje IA", m.puntaje ?? "—", "último puntaje por PR"], ["Aprobaciones", `${m.aprobaciones.hodor} / ${m.aprobaciones.mano}`, "Hodor solo / a mano"], ["PRs", m.prs, `${m.analizados} analizados`]]
+    .map(([r, v, s]) => `<div class="kpi"><span class="rot">${r}</span><span class="v">${esc(v)}</span><span class="s">${esc(s)}</span></div>`).join("")}</div>`;
+}
+function vistaFicha() {
+  const f = S.ficha;
+  if (!f) return `<div class="pagina"><button class="btn fant chico" data-volver-personas style="align-self:flex-start">← Equipos y personas</button>${cargando()}</div>`;
+  if (f.error) return `<div class="pagina"><button class="btn fant chico" data-volver-personas style="align-self:flex-start">← Equipos y personas</button><div class="fallo">${esc(f.error)}</div></div>`;
+  const p = f.persona, w = f.worker || {};
+  return `<div class="pagina">
+    <button class="btn fant chico" data-volver-personas style="align-self:flex-start">← Equipos y personas${p.equipo ? ` · ${esc(p.equipo)}` : ""}</button>
+    <div class="titulo-pag"><span class="avatar g" aria-hidden="true">${esc(ini(p.nombre))}</span><div style="flex:1"><h1>${esc(p.nombre)}</h1><p>${esc(rolTexto(p.rol))} · ${esc(p.equipo || "sin equipo")}${p.lo_aprueba.length ? ` · lo aprueba ${esc(p.lo_aprueba.map(nombreDe).join(", "))}` : ""}${w.version ? ` · ${esc(String(w.version).replace(/^v3-worker\s*/, "Hodor Worker v"))}${w.visto ? ` · conectado hace ${esc(dura(w.visto))}` : ""}` : ""}</p></div></div>
+    ${kpisMetricas(f.metricas)}
+    <div class="caja"><div class="caja-cab"><b style="font-weight:600">Sus hallazgos contra el equipo</b><span class="tenue" style="font-size:12px">barra clara: ${esc(nombre(p.correo).split(" ")[0])} · barra gris: total del equipo</span></div><div class="caja-cuerpo">${barrasComparadas(f.metricas.hallazgos, f.equipo && f.equipo.hallazgos)}</div></div>
+    <div class="tabla-caja"><div class="caja-cab"><b style="font-weight:600">Sus PRs recientes</b><span class="tenue" style="font-size:12px">REV = revisión de Hodor · últimos ${f.dias} días</span></div>
+      <table><thead><tr><th>PR</th><th>Historia</th><th>Rama</th><th>Rondas</th><th>Puntaje</th><th>Rev</th><th>Estado</th></tr></thead><tbody>${f.prs.map((x) => `<tr><td class="mono">${externo(x.url, `${esc(x.repo)} #${esc(x.pr)}`)}</td><td>${x.hu ? externo(jira(x.hu), esc(x.hu)) : "—"}</td><td class="mono">${esc(x.destino || "")}</td><td>${x.rondas}</td><td>${x.puntaje ?? "—"}</td><td>${esc(x.rev || "—")}</td><td><span class="chip ${chipEstado(x.estado)}">${esc(x.estado)}</span></td></tr>`).join("") || `<tr><td colspan="7" class="vacio">Sin PRs en el periodo.</td></tr>`}</tbody></table></div>
+  </div>`;
+}
+
+const TABS_MET = [["resumen", "Resumen"], ["revisiones", "Revisiones"], ["tiempos", "Tiempos"], ["calidad", "Calidad de IA"], ["sonar", "Sonar"],
+  ["aprobaciones", "Aprobaciones"], ["flujo", "Disciplina y consumo"], ["prod", "Producción"], ["personas", "Personas"]];
+const MET_ACCION = { aprobado: "Aprobado solo", comentado: "Con hallazgos", esperando: "Esperando al dev", manual: "Revisión manual", conflictos: "Con conflictos",
+  limpio: "Limpio (propio)", ya_aprobado: "Ya aprobado", commit_nuevo: "Commit nuevo", v3_fallo: "Falló en el worker", v3_a_cristian: "Entregado al revisor",
+  v3_release: "Release entregado", v3_release_igual: "Release igual", espera_dev: "Esperando merge a dev", espera_jira: "Esperando la historia" };
+const MET_ESTADO = { hecha: "Terminadas", fallida: "Fallidas", superada: "Superadas", pendiente: "En cola", corriendo: "Revisando", espera: "En espera" };
+const MET_VIA = { revisor: "Revisor de Hodor", "auto-dev": "Directo a development", config: "Config", replica: "Réplica", "hodor-emoji": "Emoji :hodor:",
+  "prs-prod": "PRs a Prod", "por-aprobar": "Por aprobar", telegram: "Telegram", app: "App", "hodor-ok": "Hodor OK", "boton-slack": "Botón de Slack",
+  compromiso: "Acta de compromiso", "config-a-mano": "Config a mano", supervisor: "Hodor Supervisor", consola: "Consola de AWS", "a mano": "A mano",
+  "otra persona": "Otra persona" };
+const MET_RAMA = [["development", "development"], ["master", "master"], ["release", "release"]];
+const metNum = (v, dec = 0) => (v == null || v === "" || Number.isNaN(Number(v)) ? "—" : Number(v).toLocaleString("es-CO", { maximumFractionDigits: dec, minimumFractionDigits: 0 }));
+const metPct = (v) => (v == null ? "—" : `${metNum(v)} %`);
+const metH = (v) => (v == null ? "—" : v >= 24 ? `${metNum(v / 24, 1)} d` : v < 1 ? `${metNum(v * 60)} min` : `${metNum(v, 1)} h`);
+const metMin = (v) => (v == null ? "—" : v >= 90 ? `${metNum(v / 60, 1)} h` : `${metNum(v, 1)} min`);
+const metUsd = (v) => (v == null ? "—" : `US$ ${metNum(v, 2)}`);
+const metTono = (v, bien, mal, menor = false) => (v == null ? "" : menor ? (v <= bien ? "ok" : v >= mal ? "bad" : "warn") : (v >= bien ? "ok" : v <= mal ? "bad" : "warn"));
+const metK = (r, v, s = "", tono = "") => ({ r, v, s, tono });
+const metB = (titulo, items, color = "acc", sub = "") => ({ titulo, sub, items: items.filter((x) => x.n != null), color });
+
+function metSpec(m, tab) {
+  const o = (x) => x || {};
+  const t = o(m.tiempos), rv = o(m.revisiones), ap = o(m.aprobaciones), so = o(m.sonar), di = o(m.disciplina), co = o(m.consumo), cv = o(m.conversas),
+    pr = o(m.prod), pv = o(m.pivote), sev = o(m.hallazgos_sev), st = m.pr_staging, ji = m.jira;
+  const graves = sev.critica != null ? (sev.critica || 0) + (sev.alta || 0) : null;
+  if (tab === "resumen") {
+    return [{ titulo: "Resumen", sub: "Lo principal del periodo, en números", kpis: [
+      metK("PRs", metNum(m.prs), `${metNum(m.historias)} historias · ${metNum(m.repos)} repos`),
+      metK("Rebote", metPct(o(m.rebote).pct), `${metNum(o(m.rebote).n)} de ${metNum(m.analizados)} PRs analizados`, metTono(o(m.rebote).pct, 15, 30, true)),
+      metK("Pivote", metPct(pv.pct), `${metNum(pv.n)} historias · ${metNum(pv.eventos)} PRs rehechos`, metTono(pv.pct, 10, 25, true)),
+      metK("Puntaje IA", metNum(m.puntaje), `mediana ${metNum(m.puntaje_mediana)}`, metTono(m.puntaje, 90, 75)),
+      metK("Aprobó Hodor solo", metPct(ap.pct_hodor), `${metNum(ap.hodor)} de ${metNum(ap.total)} aprobados`),
+      metK("Espera del aprobador", metH(t.espera_aprobador_h), "mediana en horas hábiles", metTono(t.espera_aprobador_h, 2, 8, true)),
+      metK("Cobertura Sonar", metPct(so.cobertura), `gate en verde ${metPct(so.gate_pct)}`, metTono(so.cobertura, 80, 60)),
+      metK("Disciplina", metNum(di.puntaje), "de 100", metTono(di.puntaje, 85, 60)),
+      metK("Listos a prod", metNum(pr.listos), "esperan aprobación"),
+      metK("Consumo de IA", metUsd(co.usd_total), "a precio de API"),
+    ], barras: [
+      metB("PRs por rama", MET_RAMA.map(([k, l]) => ({ t: l, n: o(m.por_rama)[k] }))),
+      metB("Estado de los PRs", [{ t: "Mergeados", n: m.mergeados, color: "ok" }, { t: "Abiertos", n: m.abiertos }, { t: "Cerrados sin merge", n: m.cerrados, color: "off" }]),
+      metB("Pivotes por tipo", Object.entries(o(pv.por_tipo)).map(([k, n]) => ({ t: k.charAt(0).toUpperCase() + k.slice(1), n })), "warn"),
+    ] }];
+  }
+  if (tab === "revisiones") {
+    return [{ titulo: "Revisiones de Hodor", sub: "Análisis sobre los PRs del periodo", kpis: [
+      metK("Revisiones", metNum(rv.total), "todas las corridas"),
+      metK("PRs analizados", metNum(m.analizados), `de ${metNum(m.prs)} PRs`),
+      metK("Rondas por PR", metNum(rv.rondas_prom, 1), `máximo ${metNum(rv.rondas_max)}`, metTono(rv.rondas_prom, 1.3, 2, true)),
+      metK("Re-análisis", metNum(rv.reanalisis), "rondas después de la primera"),
+      metK("Rebote", metPct(o(m.rebote).pct), `${metNum(o(m.rebote).n)} PRs con más de una ronda`, metTono(o(m.rebote).pct, 15, 30, true)),
+      metK("Fallidas", metNum(rv.fallidas), "no terminaron", rv.fallidas ? "warn" : ""),
+    ], barras: [
+      metB("Resultado del análisis", Object.entries(o(rv.por_accion)).sort((a, b) => b[1] - a[1]).map(([k, n]) => ({ t: MET_ACCION[k] || k, n }))),
+      metB("Estado de las revisiones", Object.entries(o(rv.por_estado)).sort((a, b) => b[1] - a[1]).map(([k, n]) => ({ t: MET_ESTADO[k] || k, n, color: k === "fallida" ? "bad" : k === "hecha" ? "ok" : "off" }))),
+    ] }, { titulo: "Pivotes", sub: "Historias que cambiaron de rumbo (definición propuesta)", kpis: [
+      metK("Historias con pivote", metNum(pv.n), `de ${metNum(m.historias)} historias`),
+      metK("Tasa de pivote", metPct(pv.pct), "sobre las historias", metTono(pv.pct, 10, 25, true)),
+      metK("PRs rehechos", metNum(pv.eventos), "cerrados y rehechos o nuevos tras un merge"),
+    ], barras: [
+      metB("Por tipo", Object.entries(o(pv.por_tipo)).map(([k, n]) => ({ t: k.charAt(0).toUpperCase() + k.slice(1), n })), "warn"),
+      metB("Por rama", MET_RAMA.map(([k, l]) => ({ t: l, n: o(pv.por_rama)[k] })), "warn"),
+    ] }];
+  }
+  if (tab === "tiempos") {
+    const pr_ = o(t.por_rama), de = o(t.despliegue_min);
+    const secs = [{ titulo: "Tiempos por tramo", sub: "Medianas del periodo", kpis: [
+      metK("Análisis", metMin(t.analisis_min), "lo que tarda Hodor en analizar"),
+      metK("Cola", metMin(t.cola_min), "del pedido a que arranca"),
+      metK("Espera del aprobador", metH(t.espera_aprobador_h), "de listo a aprobado, horas hábiles", metTono(t.espera_aprobador_h, 2, 8, true)),
+      metK("Hasta aprobar", metH(t.aprobar_h), "de abierto a aprobado"),
+      metK("Hasta merge", metH(t.merge_h), "de abierto a mergeado"),
+      metK("Aprobado a merge", metH(t.aprobado_merge_h), "lo que tarda el merge"),
+      metK("Merge dev a PR master", metH(t.promocion_ci_h), "promoción a ci"),
+      metK("Despliegue a ci", metMin(de.master), "del merge a master al fin del pipeline"),
+      metK("Aprobación a prod", metH(t.prod_espera_h), `de listo a aprobado en release · desde abierto ${metH(t.prod_aprobar_h)}`),
+    ], barras: [metB("Despliegue por rama", MET_RAMA.map(([k, l]) => ({ t: l, n: de[k], v: metMin(de[k]) })), "info", "minutos del merge al fin del pipeline")],
+    tabla: { clave: "met-tiempos", cols: [
+      { id: "rama", t: "Rama", v: (f) => f.rama },
+      { id: "n", t: "Aprobados", num: true, v: (f) => f.n },
+      { id: "espera", t: "Espera aprobador", num: true, v: (f) => f.espera_h, txt: (f) => metH(f.espera_h) },
+      { id: "aprobar", t: "Hasta aprobar", num: true, v: (f) => f.aprobar_h, txt: (f) => metH(f.aprobar_h) },
+      { id: "merge", t: "Hasta merge", num: true, v: (f) => f.merge_h, txt: (f) => metH(f.merge_h) },
+      { id: "desp", t: "Despliegue", num: true, v: (f) => f.desp, txt: (f) => metMin(f.desp) },
+    ], filas: MET_RAMA.map(([k, l]) => ({ rama: l, ...o(pr_[k]), desp: de[k] })) } }];
+    if (!st) secs.push({ titulo: "Jira", sub: "PR STAGING e historias", nota: "Activa «Jira» arriba para leer PR STAGING y las historias del equipo (tarda unos segundos)." });
+    else if (!st.disponible) secs.push({ titulo: "Jira", sub: "PR STAGING e historias", nota: `Jira no disponible: ${st.motivo || "sin datos"}.` });
+    else {
+      secs.push({ titulo: "PR STAGING", sub: "Horas hábiles por paso en PR STAGING (Jira)", kpis: [
+        metK("Mediana", metH(st.mediana_h), `${metNum(st.n)} pasos`, metTono(st.mediana_h, 4, 12, true)),
+        metK("Promedio", metH(st.promedio_h), `máximo ${metH(st.max_h)}`),
+        metK("Devueltas", metPct(st.pct_devueltas), `${metNum(st.devueltas)} volvieron a progreso`, metTono(st.pct_devueltas, 10, 30, true)),
+        metK("Aprobadas", metNum(st.aprobadas), "salieron a Staging o más"),
+        metK("En espera", metNum(st.en_espera), "siguen en PR STAGING"),
+        metK("Repetidas", metNum(st.repetidas), "historias que pasaron más de una vez"),
+      ] });
+      if (ji && ji.disponible) secs.push({ titulo: "Historias", sub: "Jira, asignadas a los devs del equipo", kpis: [
+        metK("Activas", metNum(ji.activas), `${metNum(ji.puntos_activos, 1)} puntos`), metK("En progreso", metNum(ji.en_progreso)),
+        metK("Congeladas", metNum(ji.congeladas), "3+ días sin moverse", ji.congeladas ? "warn" : ""),
+        metK("Terminadas", metNum(ji.terminadas), `${metNum(ji.puntos_terminados, 1)} puntos`),
+        metK("Real vs estimado", metPct(ji.real_vs_estimado), "mediana, 100 % = lo estimado", metTono(ji.real_vs_estimado, 130, 200, true)),
+      ] });
+    }
+    return secs;
+  }
+  if (tab === "calidad") {
+    const colores = { "90-100": "ok", "80-89": "acc", "70-79": "warn", "60-69": "nar", "<60": "bad" };
+    return [{ titulo: "Calidad de IA", sub: "Puntaje y hallazgos de los análisis", kpis: [
+      metK("Puntaje promedio", metNum(m.puntaje), "último puntaje por PR", metTono(m.puntaje, 90, 75)),
+      metK("Mediana", metNum(m.puntaje_mediana)), metK("Mínimo", metNum(m.puntaje_min), "", metTono(m.puntaje_min, 80, 60)),
+      metK("Hallazgos", metNum(m.hallazgos_total), "todas las rondas"),
+      metK("Por PR analizado", metNum(m.hallazgos_por_pr, 1)),
+      metK("Graves", metNum(graves), "críticos y altos", graves ? "bad" : "ok"),
+    ], barras: [
+      metB("Distribución del puntaje", (m.puntaje_dist || []).map((x) => ({ t: x.rango, n: x.n, color: colores[x.rango] }))),
+      metB("Por severidad", [["critica", "Crítica", "bad"], ["alta", "Alta", "nar"], ["media", "Media", "warn"], ["baja", "Baja", "info"]].map(([k, l, c]) => ({ t: l, n: sev[k], color: c }))),
+      metB("Por categoría", (m.hallazgos || []).slice(0, 12).map((h) => ({ t: h.categoria.charAt(0).toUpperCase() + h.categoria.slice(1), n: h.n }))),
+    ] }];
+  }
+  if (tab === "sonar") {
+    const pi = o(m.pipelines), bu = o(m.builds);
+    return [{ titulo: "Sonar", sub: "Última medida de cada PR, código nuevo", kpis: [
+      metK("PRs medidos", metNum(so.medidos)), metK("Gate en verde", metPct(so.gate_pct), `${metNum(so.gate_ok)} PRs`, metTono(so.gate_pct, 85, 60)),
+      metK("Cobertura", metPct(so.cobertura), "promedio", metTono(so.cobertura, 80, 60)),
+      metK("Cobertura < 80 %", metNum(so.cobertura_baja), "PRs", so.cobertura_baja ? "warn" : ""),
+      metK("Duplicación", metPct(so.duplicacion), "promedio", metTono(so.duplicacion, 3, 6, true)),
+      metK("Violaciones", metNum(so.violaciones)), metK("Bugs", metNum(so.bugs), "", so.bugs ? "bad" : "ok"),
+      metK("Vulnerabilidades", metNum(so.vulnerabilidades), "", so.vulnerabilidades ? "bad" : "ok"), metK("Code smells", metNum(so.code_smells)),
+      metK("Análisis en rojo", metNum(so.analisis_rojos), `${metNum(so.prs_con_rojo)} PRs`, so.analisis_rojos ? "warn" : ""),
+    ], barras: [metB("Issues nuevos", [{ t: "Violaciones", n: so.violaciones }, { t: "Bugs", n: so.bugs, color: "bad" }, { t: "Vulnerabilidades", n: so.vulnerabilidades, color: "bad" }, { t: "Code smells", n: so.code_smells, color: "warn" }])] },
+    { titulo: "Builds y pipelines", sub: "CodeBuild del PR y pipeline después del merge", kpis: [
+      metK("Builds fallidos", metNum(bu.fallidos), `${metNum(bu.prs)} PRs`, bu.fallidos ? "warn" : ""),
+      metK("Pipelines vigilados", metNum(pi.vigilados)), metK("Pipelines bien", metPct(pi.pct_ok), `${metNum(pi.ok)} de ${metNum(pi.vigilados)}`, metTono(pi.pct_ok, 95, 80)),
+      metK("Pipelines fallidos", metNum(pi.fallidos), "fallidos, trabados o sin arrancar", pi.fallidos ? "bad" : ""),
+    ] }];
+  }
+  if (tab === "aprobaciones") {
+    const ra = o(ap.por_rama);
+    return [{ titulo: "Aprobaciones", sub: "Quién aprobó los PRs del periodo y cuánto tardó", kpis: [
+      metK("Aprobados", metNum(ap.total)), metK("Hodor solo", metNum(ap.hodor), metPct(ap.pct_hodor), "ok"),
+      metK("A mano", metNum(ap.mano), "emoji, PRs a Prod, Supervisor o consola"), metK("Otra persona", metNum(ap.otro), "en CodeCommit"),
+      metK("Espera del aprobador", metH(ap.espera_h), "mediana, horas hábiles", metTono(ap.espera_h, 2, 8, true)),
+      metK("Hasta aprobar", metH(ap.aprobar_h), "de abierto a aprobado"),
+    ], barras: [
+      metB("Por vía", (ap.por_via || []).map((x) => ({ t: MET_VIA[x.via] || x.via, n: x.n, color: x.tipo === "auto" ? "ok" : x.tipo === "otro" ? "off" : "acc" }))),
+      metB("Por aprobador", (ap.por_aprobador || []).map((x) => ({ t: x.nombre, n: x.n, color: x.hodor ? "ok" : "acc" }))),
+    ], tabla: { clave: "met-aprob", cols: [
+      { id: "rama", t: "Rama", v: (f) => f.rama },
+      { id: "hodor", t: "Hodor solo", num: true, v: (f) => f.hodor }, { id: "mano", t: "A mano", num: true, v: (f) => f.mano },
+      { id: "otro", t: "Otra persona", num: true, v: (f) => f.otro },
+      { id: "pct", t: "% solo", num: true, v: (f) => f.pct, txt: (f) => metPct(f.pct) },
+    ], filas: MET_RAMA.map(([k, l]) => { const x = o(ra[k]); const tot = (x.hodor || 0) + (x.mano || 0) + (x.otro || 0); return { rama: l, hodor: x.hodor || 0, mano: x.mano || 0, otro: x.otro || 0, pct: tot ? Math.round((100 * (x.hodor || 0)) / tot) : null }; }) } }];
+  }
+  if (tab === "flujo") {
+    return [{ titulo: "Disciplina", sub: "Cómo trabaja el equipo con el flujo de PRs, no qué tan bueno es su código", kpis: [
+      metK("Puntaje", metNum(di.puntaje), "promedio de los devs con PRs", metTono(di.puntaje, 85, 60)),
+      metK("Duplicados", metNum(di.duplicados), "PRs abiertos dos veces", di.duplicados ? "warn" : ""),
+      metK("Reabiertos", metNum(di.reabiertos), "cerrados con observaciones para abrir otro", di.reabiertos ? "warn" : ""),
+      metK("Ramas inválidas", metNum(di.ramas_invalidas), "no siguen usuario/ambiente/HU", di.ramas_invalidas ? "warn" : ""),
+      metK("Builds rotos", metNum(di.builds_rotos), "PRs con CodeBuild fallido"),
+      metK("Aprobados sin Hodor", metNum(di.sin_hodor), "otra persona aprobó antes que Hodor", di.sin_hodor ? "bad" : ""),
+      metK("Rondas antes de master", metNum(di.rondas_master, 2), "observaciones por PR mergeado a master"),
+    ] }, { titulo: "Consumo de IA", sub: "US$ a precio de API (el plan Team no cobra por token, cuenta para la cuota)", kpis: [
+      metK("Total", metUsd(co.usd_total)), metK("Worker de los devs", metUsd(co.usd_worker)), metK("Revisor de Hodor", metUsd(co.usd_revisor)),
+      metK("Conversaciones", metUsd(co.usd_conversas)), metK("Por PR analizado", metUsd(co.usd_por_pr)),
+      metK("Análisis en el worker", metNum(co.analisis_worker), `${metNum(co.entregados)} entregados · ${metNum(co.aprobados_worker)} aprobados`),
+      metK("Cobertura del worker", metPct(co.cobertura_worker), "PRs a development y master analizados", metTono(co.cobertura_worker, 90, 60)),
+      metK("Minutos de Claude", metNum(co.minutos_worker), "en el worker"), metK("Fallos del worker", metNum(co.fallos_worker), "", co.fallos_worker ? "warn" : ""),
+    ], barras: [metB("US$ por fuente", [{ t: "Worker", n: co.usd_worker, v: metUsd(co.usd_worker) }, { t: "Revisor", n: co.usd_revisor, v: metUsd(co.usd_revisor) }, { t: "Conversaciones", n: co.usd_conversas, v: metUsd(co.usd_conversas) }], "info")] },
+    { titulo: "Conversaciones con Hodor", sub: "En los hilos de los PRs del equipo", kpis: [
+      metK("Conversaciones", metNum(cv.n)), metK("Réplicas", metNum(cv.replicas), "discuten un hallazgo"), metK("Preguntas", metNum(cv.preguntas)),
+      metK("Hodor les dio la razón", metPct(cv.razon_pct), `${metNum(cv.acepto)} aceptados · ${metNum(cv.mantengo)} mantenidos`),
+    ] }];
+  }
+  if (tab === "prod") {
+    const av = o(pr.por_aviso);
+    return [{ titulo: "PRs a producción", sub: "PRs a release del periodo", kpis: [
+      metK("PRs a release", metNum(pr.prs)), metK("Enviados", metNum(pr.enviados), "con «Enviar PR a prod»"), metK("Aprobados", metNum(pr.aprobados)),
+      metK("Mergeados", metNum(pr.mergeados), "", "ok"), metK("Con cambios pedidos", metNum(pr.con_cambios), "homologar, correcciones o conflictos", pr.con_cambios ? "warn" : ""),
+      metK("Listos ahora", metNum(pr.listos), "5 puertas en verde"), metK("Espera de aprobación", metH(t.prod_espera_h), "mediana, horas hábiles"),
+    ], barras: [metB("Avisos al dev", [{ t: "Homologar", n: av.homologar }, { t: "Correcciones", n: av.correcciones }, { t: "Conflictos", n: av.conflictos, color: "bad" }], "warn")] }];
+  }
+  const filas = m.personas || [];
+  const conSt = filas.some((f) => f.staging_h != null);
+  return [{ titulo: "Personas", sub: "Números de cada dev del equipo. Clic en una fila para ver su ficha.", tabla: { clave: "met-personas", clic: (f) => f.correo, cols: [
+    { id: "nombre", t: "Persona", v: (f) => f.nombre, fuerte: true },
+    { id: "prs", t: "PRs", num: true, v: (f) => f.prs }, { id: "mergeados", t: "Merge", num: true, v: (f) => f.mergeados },
+    { id: "historias", t: "Historias", num: true, v: (f) => f.historias },
+    { id: "rebote", t: "Rebote", num: true, v: (f) => f.rebote, txt: (f) => metPct(f.rebote), tono: (f) => metTono(f.rebote, 15, 30, true) },
+    { id: "rondas", t: "Rondas", num: true, v: (f) => f.rondas, txt: (f) => metNum(f.rondas, 1) },
+    { id: "pivotes", t: "Pivotes", num: true, v: (f) => f.pivotes },
+    { id: "puntaje", t: "Puntaje IA", num: true, v: (f) => f.puntaje, txt: (f) => metNum(f.puntaje), tono: (f) => metTono(f.puntaje, 90, 75) },
+    { id: "hallazgos", t: "Hallazgos", num: true, v: (f) => f.hallazgos }, { id: "graves", t: "Graves", num: true, v: (f) => f.graves, tono: (f) => (f.graves ? "bad" : "") },
+    { id: "hodor", t: "Hodor solo", num: true, v: (f) => f.hodor }, { id: "mano", t: "A mano", num: true, v: (f) => f.mano },
+    { id: "espera", t: "Espera", num: true, v: (f) => f.espera_h, txt: (f) => metH(f.espera_h) },
+    ...(conSt ? [{ id: "staging", t: "PR STAGING", num: true, v: (f) => f.staging_h, txt: (f) => metH(f.staging_h) }] : []),
+    { id: "cobertura", t: "Cobertura", num: true, v: (f) => f.cobertura, txt: (f) => metPct(f.cobertura), tono: (f) => metTono(f.cobertura, 80, 60) },
+    { id: "bugs", t: "Bugs", num: true, v: (f) => f.bugs }, { id: "builds", t: "Builds rotos", num: true, v: (f) => f.builds },
+    { id: "disciplina", t: "Disciplina", num: true, v: (f) => f.disciplina, tono: (f) => metTono(f.disciplina, 85, 60) },
+    { id: "usd", t: "US$ IA", num: true, v: (f) => f.usd, txt: (f) => metNum(f.usd, 2) },
+  ], filas, orden: { col: "prs", dir: "desc" } } }];
+}
+const DEFS_MET = { resumen: ["rebote", "pivote", "puntaje", "aprobaciones", "disciplina"], revisiones: ["revisiones", "rebote", "pivote"], tiempos: ["tiempos", "pr_staging"],
+  calidad: ["puntaje", "hallazgos"], sonar: ["sonar"], aprobaciones: ["aprobaciones"], flujo: ["disciplina", "consumo"], prod: ["prod"], personas: [] };
+const NOMBRE_DEF = { rebote: "Rebote", pivote: "Pivote", puntaje: "Puntaje IA", aprobaciones: "Aprobaciones", disciplina: "Disciplina", revisiones: "Revisiones",
+  tiempos: "Tiempos", pr_staging: "PR STAGING", hallazgos: "Hallazgos", sonar: "Sonar", consumo: "Consumo", prod: "Producción" };
+
+const TONO_MET = { ok: "var(--ok)", warn: "var(--warn)", bad: "var(--bad)", acc: "var(--acc)", info: "var(--info)", nar: "var(--nar)", off: "var(--linea-3)" };
+function metBarras(b) {
+  const max = Math.max(1, ...b.items.map((x) => Number(x.n) || 0));
+  const hay = b.items.some((x) => Number(x.n));
+  return `<div class="caja"><div class="caja-cab"><b style="font-weight:600">${esc(b.titulo)}</b>${b.sub ? `<span class="tenue" style="font-size:12px">${esc(b.sub)}</span>` : ""}</div><div class="caja-cuerpo">${hay ? `<div class="barras">${b.items.map((x) => `<div class="barra-h"><span>${esc(x.t)}</span><span class="pista"><span class="relleno" style="display:block;width:${(Number(x.n) ? Math.max(2, (100 * Number(x.n)) / max) : 0).toFixed(1)}%;background:${TONO_MET[x.color || b.color] || TONO_MET.acc}"></span></span><span class="mono">${esc(x.v != null ? x.v : metNum(x.n, 2))}</span></div>`).join("")}</div>` : `<span class="tenue">Sin datos en el periodo.</span>`}</div></div>`;
+}
+function metOrdenar(tb) {
+  const o = S.orden[tb.clave] || tb.orden || { col: tb.cols[0].id, dir: "asc" };
+  const col = tb.cols.find((c) => c.id === o.col) || tb.cols[0];
+  const filas = [...tb.filas].sort((a, b) => {
+    const x = col.v(a), y = col.v(b);
+    if (x == null || x === "") return y == null || y === "" ? 0 : 1;
+    if (y == null || y === "") return -1;
+    const r = typeof x === "number" && typeof y === "number" ? x - y : String(x).localeCompare(String(y), "es");
+    return o.dir === "asc" ? r : -r;
+  });
+  return { o, filas };
+}
+function metTabla(tb) {
+  const { o, filas } = metOrdenar(tb);
+  const cab = tb.cols.map((c) => `<th class="${c.num ? "num" : ""}" aria-sort="${o.col === c.id ? (o.dir === "asc" ? "ascending" : "descending") : "none"}"><button class="orden" data-orden="${tb.clave}:${c.id}">${esc(c.t)}<span aria-hidden="true">${o.col === c.id ? (o.dir === "asc" ? " ↑" : " ↓") : ""}</span></button></th>`).join("");
+  const cuerpo = filas.map((f) => `<tr${tb.clic ? ` class="clic" tabindex="0" data-ficha="${esc(tb.clic(f))}"` : ""}>${tb.cols.map((c) => {
+    const v = c.txt ? c.txt(f) : c.v(f) == null ? "—" : c.num ? metNum(c.v(f), 2) : c.v(f);
+    const tono = c.tono ? TONO_MET[c.tono(f)] : "";
+    return `<td class="${c.num ? "num mono" : c.fuerte ? "nom" : ""}"${tono ? ` style="color:${tono}"` : ""}>${c.fuerte ? `<b style="font-weight:500">${esc(v)}</b>` : esc(v)}</td>`;
+  }).join("")}</tr>`).join("") || `<tr><td colspan="${tb.cols.length}" class="vacio">Sin datos en el periodo.</td></tr>`;
+  return `<div class="tabla-caja"><table><thead><tr>${cab}</tr></thead><tbody>${cuerpo}</tbody></table></div>`;
+}
+function metSeccion(s) {
+  return `<section class="met-sec"><div><h2>${esc(s.titulo)}</h2>${s.sub ? `<p class="suave">${esc(s.sub)}</p>` : ""}</div>
+    ${s.nota ? `<div class="caja vacio">${esc(s.nota)}</div>` : ""}
+    ${s.kpis ? `<div class="kpis">${s.kpis.map((k) => `<div class="kpi"><span class="rot">${esc(k.r)}</span><span class="v"${TONO_MET[k.tono] ? ` style="color:${TONO_MET[k.tono]}"` : ""}>${esc(k.v)}</span>${k.s ? `<span class="s">${esc(k.s)}</span>` : ""}</div>`).join("")}</div>` : ""}
+    ${s.barras && s.barras.length ? `<div class="met-barras">${s.barras.map(metBarras).join("")}</div>` : ""}
+    ${s.tabla ? metTabla(s.tabla) : ""}</section>`;
+}
+function vistaMetricas() {
+  const eqs = ((S.datos.equipos || {}).equipos || []).map((e) => e.nombre);
+  const equipo = S.equipo || eqs[0] || "";
+  const d = S.datos.metricasEq;
+  const m = d && !d.error ? (d.equipos || [])[0] : null;
+  const tab = TABS_MET.some(([k]) => k === S.metTab) ? S.metTab : "resumen";
+  const pest = `<div class="pestanas" role="tablist" aria-label="Temas de las métricas">${TABS_MET.map(([k, l]) => `<button class="pestana" role="tab" data-met-tab="${k}" aria-selected="${tab === k}">${esc(l)}</button>`).join("")}</div>`;
+  const defs = m ? (DEFS_MET[tab] || []).filter((k) => (d.definiciones || {})[k]) : [];
+  return `<div class="pagina">
+    ${cabecera(`Métricas · ${esc(equipo || "—")} · últimos ${S.dias} días`, equipo ? `Cómo trabaja ${esc(equipo)}` : "Cómo trabaja el equipo", `Números de los devs del equipo: el autor del PR decide a qué equipo cuenta.${m ? ` ${m.devs} devs · ${m.activos ?? "—"} con PRs.` : ""}`, `<div class="barra">${eqs.length ? `<select data-equipo-global aria-label="Equipo">${eqs.map((e) => `<option value="${esc(e)}" ${e === equipo ? "selected" : ""}>${esc(e)}</option>`).join("")}</select>` : ""}${[7, 30, 56, 90].map((n) => `<button class="filtro" data-dias="${n}" aria-pressed="${S.dias === n}">${n} días</button>`).join("")}<label class="filtro" style="cursor:pointer"><input type="checkbox" data-staging ${S.staging ? "checked" : ""} style="margin:0"> Jira</label>${recargar("metricasEq")}</div>`)}
+    ${!equipo ? `<div class="caja vacio">No hay equipos todavía.</div>` : ""}
+    ${errorDe("metricasEq")}
+    ${equipo ? `${pest}${m ? `${metSpec(m, tab).map(metSeccion).join("")}
+      ${defs.length ? `<div class="caja"><div class="caja-cab"><b style="font-weight:600">Cómo se mide</b></div><div class="caja-cuerpo">${defs.map((k) => `<div><b style="font-weight:500">${esc(NOMBRE_DEF[k] || k)}</b> <span class="suave">${esc(d.definiciones[k])}</span></div>`).join("")}</div></div>` : ""}`
+      : (d && d.error ? "" : cargando())}` : ""}
+  </div>`;
+}
+
+function vistaProd() {
+  const d = S.datos.prod;
+  const todos = (d || {}).items || [];
+  const lista = S.prodVista === "listos" ? todos.filter((x) => x.listo) : todos;
+  const sel = lista.find((x) => x.pr === S.sel) || lista[0];
+  return `<div class="pagina">
+    ${cabecera("PRs a producción", "Lo que vas a aprobar y de dónde viene", "Cada PR a release con su historia y sus PRs hermanos en development y master.", recargar("prod"))}
+    ${errorDe("prod")}
+    <div class="pestanas" role="tablist"><button class="pestana" role="tab" data-prod-vista="listos" aria-selected="${S.prodVista === "listos"}">Por aprobar <span class="chip c-off mono">${todos.filter((x) => x.listo).length}</span></button><button class="pestana" role="tab" data-prod-vista="todos" aria-selected="${S.prodVista === "todos"}">En curso <span class="chip c-off mono">${todos.length}</span></button></div>
+    ${d ? (lista.length ? `<div class="dos">
+      <div class="lista-prs">${lista.map((x) => `<button class="fila-pr" data-sel="${esc(x.pr)}" aria-current="${sel && sel.pr === x.pr}"><span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="chip c-off">${esc(x.equipo || "sin equipo")}</span><span class="mono">${esc(x.repo)} #${esc(x.pr)}</span>${x.listo ? `<span class="chip c-ok">listo</span>` : `<span class="chip c-warn">${esc(x.veredicto || "")}</span>`}</span><span class="suave" style="font-size:12px">${esc(x.hu || "sin historia")} · ${esc([x.dev, hace(x.enviado_en || x.creado)].filter(Boolean).join(" · "))}</span></button>`).join("")}</div>
+      ${sel ? `<section class="caja" aria-label="Detalle del PR ${esc(sel.pr)}"><div class="caja-cab"><span style="display:flex;flex-direction:column;flex:1;min-width:240px"><span>${sel.hu ? externo(jira(sel.hu), `<b>${esc(sel.hu)}</b>`) : "<b>sin historia</b>"} ${esc(sel.titulo || "")}</span><span class="tenue" style="font-size:12px">${esc(sel.repo)} · ${esc(sel.dev)}${sel.motivo ? ` · ${esc(sel.motivo)}` : ""}</span></span>${botonAprobar(sel)}</div>
+        <div class="caja-cuerpo">${falloHtml(sel)}<div class="rot">Cadena de la historia</div>${cadenaHtml(sel)}<div class="rot">Puertas</div>${puertasHtml(sel)}</div></section>` : ""}
+    </div>` : `<div class="caja vacio">${S.prodVista === "listos" ? "No hay PRs listos para aprobar." : "No hay PRs a release en curso."}</div>`) : cargando()}
+  </div>`;
+}
+
+function valorRegla(r, v) {
+  const cat = ((S.datos.reglas || {}).catalogo || {})[r] || {};
+  if (v === undefined || v === null || v === "") return null;
+  return cat.tipo === "bool" ? (v ? "sí" : "no") : String(v);
+}
+function celdaRegla(nivel, clave, regla, v, heredado) {
+  const e = S.editRegla;
+  if (e && e.nivel === nivel && e.clave === clave && e.regla === regla) {
+    const cat = S.datos.reglas.catalogo[regla];
+    const control = cat.tipo === "bool" ? `<select data-valor-regla><option value="1" ${v ? "selected" : ""}>sí</option><option value="0" ${v === false ? "selected" : ""}>no</option></select>` : `<input data-valor-regla data-foco="regla" value="${esc(v ?? "")}" ${cat.tipo === "entero" ? `inputmode="numeric"` : ""} style="width:140px">`;
+    return `<td class="regla-celda"><div class="en-linea">${control}<button class="btn prim chico" data-guardar-regla>Guardar</button>${nivel !== "general" ? `<button class="btn fant chico" data-heredar-regla>Heredar</button>` : ""}<button class="btn fant chico" data-cancelar-regla>×</button></div></td>`;
+  }
+  const t = valorRegla(regla, v);
+  return `<td class="regla-celda"><button data-editar-regla="${esc(nivel)}|${esc(clave)}|${esc(regla)}" aria-label="Editar ${esc(regla)} en ${esc(clave || "general")}">${t == null ? `<span class="hereda">— ${esc(valorRegla(regla, heredado) ?? "")}</span>` : `<b style="font-weight:500">${esc(t)}</b>`}</button></td>`;
+}
+function vistaReglas() {
+  const d = S.datos.reglas;
+  if (!d) return `<div class="pagina">${cabecera("Reglas de Hodor", "Reglas por equipo y por microservicio", "", "")}${errorDe("reglas") || cargando()}</div>`;
+  if (d.error) return `<div class="pagina">${cabecera("Reglas de Hodor", "Reglas por equipo y por microservicio", "", recargar("reglas"))}${errorDe("reglas")}</div>`;
+  const eqs = d.equipos || [];
+  const g = { ...d.defecto, ...(d.reglas.general || {}) };
+  const ms = d.reglas.ms || {};
+  const ne = S.nuevaExc;
+  return `<div class="pagina">
+    ${cabecera("Reglas de Hodor", "Reglas por equipo y por microservicio", "Cada regla tiene un valor general. Un equipo puede cambiarlo, y un microservicio puede cambiarlo sobre su equipo: gana el más específico.", `<div class="barra"><button class="btn prim" data-accion="nueva-excepcion">Agregar excepción</button>${recargar("reglas")}</div>`)}
+    ${ne ? `<div class="caja"><div class="caja-cuerpo"><div class="en-linea">
+      <label class="campo"><span>Nivel</span><select data-exc="nivel"><option value="equipo" ${ne.nivel === "equipo" ? "selected" : ""}>Equipo</option><option value="ms" ${ne.nivel === "ms" ? "selected" : ""}>Microservicio</option></select></label>
+      <label class="campo"><span>${ne.nivel === "ms" ? "Microservicio" : "Equipo"}</span>${ne.nivel === "ms" ? `<input data-exc="clave" value="${esc(ne.clave || "")}" placeholder="ms-company">` : `<select data-exc="clave">${(d.equipos || []).map((e) => `<option ${ne.clave === e ? "selected" : ""}>${esc(e)}</option>`).join("")}</select>`}</label>
+      <label class="campo"><span>Regla</span><select data-exc="regla">${Object.entries(d.catalogo).map(([k, c]) => `<option value="${esc(k)}" ${ne.regla === k ? "selected" : ""}>${esc(c.nombre)}</option>`).join("")}</select></label>
+      <label class="campo"><span>Valor</span><input data-exc="valor" value="${esc(ne.valor || "")}"></label>
+      <button class="btn prim chico" data-accion="guardar-excepcion" style="align-self:flex-end">Guardar</button><button class="btn fant chico" data-accion="cancelar-excepcion" style="align-self:flex-end">Cancelar</button></div></div></div>` : ""}
+    <div class="barra"><span class="chip c-off">General</span>→<span class="chip c-off">Equipo</span>→<span class="chip c-acc">Microservicio (gana)</span></div>
+    <div class="tabla-caja"><table><thead><tr><th>Regla</th><th>General</th>${eqs.map((e) => `<th>${esc(e)}</th>`).join("")}<th>Por microservicio</th></tr></thead><tbody>
+      ${Object.entries(d.catalogo).map(([k, c]) => `<tr><td><b style="font-weight:500">${esc(c.nombre)}</b>${c.aplica ? "" : ` <span class="chip c-info">solo registro</span>`}<br><span class="tenue" style="font-size:12px">${esc(c.ayuda)}</span></td>${celdaRegla("general", "", k, g[k], g[k])}${eqs.map((e) => celdaRegla("equipo", e, k, ((d.reglas.equipos || {})[e] || {})[k], g[k])).join("")}<td>${Object.entries(ms).filter(([, v]) => v[k] !== undefined).map(([m, v]) => `<span class="chip c-acc" style="margin:2px">${esc(m)}: ${esc(valorRegla(k, v[k]))}<button class="x" data-quitar-ms="${esc(m)}|${esc(k)}" aria-label="Quitar excepción de ${esc(m)}">×</button></span>`).join("") || `<span class="hereda">—</span>`}</td></tr>`).join("")}
+    </tbody></table></div>
+    <p class="pie">«—» = hereda el valor de arriba. Cada cambio queda registrado.</p>
+  </div>`;
+}
+
+function vistaAjustes() {
+  const e = S.estado || {};
+  return `<div class="pagina">${cabecera("Ajustes", "Tu Hodor Supervisor", "Lo que dice tu config.json. Para cambiarlo, edítalo y reinicia el servicio.", "")}
+    <div class="caja"><div class="caja-cuerpo">
+      <div><span class="tenue">Versión</span> <span class="mono">${esc(VERSION)}</span></div>
+      <div><span class="tenue">Hodor</span> <span class="mono">${esc(e.api || "")}</span></div>
+      <div><span class="tenue">Token</span> ${e.token ? `<span class="chip c-ok">configurado</span>` : `<span class="chip c-bad">falta en config.json</span>`}</div>
+      <div><span class="tenue">Perfil de AWS</span> <span class="mono">${esc(e.aws_profile || "por defecto")}</span> · <span class="mono">${esc(e.aws_region || "")}</span> ${e.aws ? `<span class="chip c-ok">AWS CLI encontrado</span>` : `<span class="chip c-bad">no encuentro el AWS CLI</span>`}</div>
+      <div><span class="tenue">Entras como</span> ${esc((S.yo || {}).nombre || "")} · ${esc(rolTexto((S.yo || {}).rol))}</div>
+      <div class="barra" role="radiogroup" aria-label="Tema del panel">${TEMAS.map(([k, l]) => `<button class="filtro" role="radio" aria-checked="${S.tema === k}" aria-pressed="${S.tema === k}" data-tema="${k}">${l}</button>`).join("")}</div>
+    </div></div></div>`;
+}
+
+function contenido() {
+  if (S.error) return `<div class="pagina">${cabecera("Hodor Supervisor", "No pude entrar", "", "")}<div class="fallo">${esc(S.error)}</div><p class="suave">Revisa el token de tu config.json o pídele uno nuevo al revisor.</p></div>`;
+  return ({ "por-aprobar": vistaPorAprobar, historial: vistaHistorial, inicio: vistaInicio, equipos: vistaEquiposPersonas, metricas: vistaMetricas,
+    "prs-a-prod": vistaProd, reglas: vistaReglas, ajustes: vistaAjustes }[S.tab] || vistaPorAprobar)();
+}
+
+function pintar() {
+  const foco = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.foco : "";
+  const pos = foco ? document.activeElement.selectionStart : null;
+  document.getElementById("app").innerHTML = S.yo || S.error ? `<div class="app">${S.yo ? lado() : ""}<main class="contenido" id="principal">${contenido()}</main></div>` : `<div class="cargando">Cargando Hodor Supervisor…</div>`;
+  if (foco) { const el = document.querySelector(`[data-foco="${foco}"]`); if (el) { el.focus(); try { if (pos != null) el.setSelectionRange(pos, pos); } catch { /* sin selección */ } } }
+}
+
+const VUELO = {};
+async function traer(k, ruta, forzar) {
+  if (!forzar && VUELO[k] && VUELO[k].ruta === ruta) return VUELO[k].p;
+  if (!forzar && S.cargado[k] === ruta && S.datos[k]) return;
+  const p = api(ruta).then((r) => { S.datos[k] = r; S.cargado[k] = ruta; delete VUELO[k]; pintar(); setTimeout(() => { if (S.cargado[k] === ruta) delete S.cargado[k]; }, 60000); });
+  VUELO[k] = { ruta, p };
+  return p;
+}
+function q(obj) { const p = new URLSearchParams(); for (const [k, v] of Object.entries(obj)) if (v !== "" && v != null) p.set(k, v); const s = p.toString(); return s ? `?${s}` : ""; }
+async function cargarTab(forzar) {
+  const t = S.tab;
+  if (t === "por-aprobar") { await Promise.all([traer("prod", "/api/sup/prod", forzar), traer("aprobados", "/api/sup/aprobados?dias=30", forzar)]); }
+  else if (t === "historial") await traer("aprobados", "/api/sup/aprobados?dias=30", forzar);
+  else if (t === "inicio") await Promise.all([traer("metricas", `/api/sup/metricas${q({ dias: S.dias })}`, forzar), traer("prod", "/api/sup/prod", forzar)]);
+  else if (t === "equipos") {
+    await Promise.all([traer("equipos", "/api/sup/equipos", forzar), traer("personas", "/api/sup/personas", forzar)]);
+    if (S.fichaDe && (!S.ficha || forzar)) { S.ficha = await api(`/api/sup/ficha${q({ correo: S.fichaDe, staging: S.staging ? 1 : "" })}`); pintar(); }
+  }
+  else if (t === "metricas") {
+    await traer("equipos", "/api/sup/equipos");
+    const eq = S.equipo || (((S.datos.equipos || {}).equipos || [])[0] || {}).nombre || "";
+    if (eq) await traer("metricasEq", `/api/sup/metricas${q({ equipo: eq, dias: S.dias, staging: S.staging ? 1 : "" })}`, forzar);
+  }
+  else if (t === "prs-a-prod") await traer("prod", "/api/sup/prod", forzar);
+  else if (t === "reglas") await traer("reglas", "/api/sup/reglas", forzar);
+}
+function invalidar(...ks) { for (const k of ks) { delete S.cargado[k]; } }
+
+async function aprobar(pr, repo) {
+  S.aprobando[pr] = true; delete S.fallos[pr]; pintar();
+  aviso(`Aprobando #${pr} en CodeCommit con tu usuario de AWS…`);
+  const r = await api("/api/aprobar", { pr, repo });
+  delete S.aprobando[pr];
+  if (r.ok) {
+    aviso(r.aviso || `Aprobaste #${pr}. Queda en Aprobados.`, r.aviso ? "warn" : "ok");
+    const it = ((S.datos.prod || {}).items || []).find((x) => x.pr === pr);
+    if (it) { it.listo = false; it.aprobado = true; }
+    invalidar("aprobados", "prod");
+    cargarTab();
+  } else {
+    S.fallos[pr] = { motivo: r.motivo || r.error || "AWS no respondió", url: r.url };
+    aviso(`No pude aprobar #${pr}: ${S.fallos[pr].motivo}`, "bad");
+  }
+  pintar();
+}
+async function enviar(ruta, cuerpo, ok, ks) {
+  const r = await api(ruta, cuerpo);
+  if (r.error) { aviso(r.error, "bad"); return null; }
+  if (ok) aviso(ok, "ok");
+  invalidar(...(ks || []));
+  await cargarTab(true);
+  return r;
+}
+document.addEventListener("click", async (ev) => {
+  const t = (s) => ev.target.closest(s);
+  let el;
+  if ((el = t("[data-tab]"))) { S.fichaDe = ""; S.ficha = null; return ir(el.dataset.tab); }
+  if ((el = t("[data-recargar]"))) { invalidar(el.dataset.recargar); S.ficha = null; aviso("Recargando…"); await cargarTab(true); return aviso("Datos al día.", "ok"); }
+  if ((el = t("[data-aprobar]"))) return aprobar(el.dataset.aprobar, el.dataset.repo);
+  if ((el = t("[data-ver-cadena]"))) { S.sel = S.sel === el.dataset.verCadena ? "" : el.dataset.verCadena; return pintar(); }
+  if ((el = t("[data-rama]"))) {
+    const [pr, k] = el.dataset.rama.split(":");
+    const abierto = el.getAttribute("aria-expanded") === "true";
+    S.abiertos.delete(`${pr}:${k}`); S.abiertos.delete(`${pr}:${k}:cerrado`);
+    if (abierto) { if (S.abiertos.has(k)) S.abiertos.add(`${pr}:${k}:cerrado`); } else S.abiertos.add(`${pr}:${k}`);
+    return pintar();
+  }
+  if ((el = t("[data-sub]"))) { S.sub = el.dataset.sub; return pintar(); }
+  if ((el = t("[data-dias-apr]"))) { S.diasApr = Number(el.dataset.diasApr); return pintar(); }
+  if ((el = t("[data-dias]"))) { S.dias = Number(el.dataset.dias); invalidar("metricas", "metricasEq"); pintar(); return cargarTab(); }
+  if ((el = t("[data-met-tab]"))) { S.metTab = el.dataset.metTab; history.replaceState({}, "", `/metricas?t=${S.metTab}`); return pintar(); }
+  if ((el = t("[data-orden]"))) {
+    const [clave, col] = el.dataset.orden.split(":");
+    const actual = S.orden[clave];
+    S.orden[clave] = { col, dir: actual && actual.col === col && actual.dir === "desc" ? "asc" : actual && actual.col === col ? "desc" : "desc" };
+    return pintar();
+  }
+  if ((el = t("[data-prod-vista]"))) { S.prodVista = el.dataset.prodVista; S.sel = ""; return pintar(); }
+  if ((el = t("[data-sel]"))) { S.sel = el.dataset.sel; return pintar(); }
+  if ((el = t("[data-ir-equipo]"))) { S.equipo = el.dataset.irEquipo; invalidar("metricasEq"); return ir("metricas"); }
+  if ((el = t("[data-ficha]"))) { S.fichaDe = el.dataset.ficha; S.ficha = null; S.tab = "equipos"; history.pushState({}, "", `/equipos?c=${encodeURIComponent(S.fichaDe)}`); pintar(); window.scrollTo(0, 0); return cargarTab(); }
+  if ((el = t("[data-volver-personas]"))) { S.fichaDe = ""; S.ficha = null; return ir("equipos"); }
+  if ((el = t("[data-tema]"))) { aplicarTema(el.dataset.tema); return pintar(); }
+  if ((el = t("[data-ep-equipo]"))) { S.eqSel = el.dataset.epEquipo; S.ed = null; S.busca = ""; S.nuevoEquipo = false; return pintar(); }
+  if ((el = t("[data-ep-filtro]"))) { S.filtroRol = el.dataset.epFiltro; return pintar(); }
+  if ((el = t("[data-probar-equipo]"))) {
+    const eq = el.dataset.probarEquipo, v = (c) => { const i = document.querySelector(`[data-cfg="${c}"]`); return i ? i.value.trim() : ""; };
+    let canal = v("canal");
+    if (canal && !canal.startsWith("#") && !/^[CG][A-Z0-9]{6,}$/.test(canal)) canal = `#${canal}`;
+    aviso("Probando canal y lista…");
+    let r; try { r = await api("/api/sup/equipos", { accion: "probar", nombre: eq, canal, lista_id: v("lista_id") }); } catch { r = { error: "No pude hablar con Hodor." }; }
+    if (r.error) return aviso(r.error, "bad");
+    aviso(`Canal: ${r.canal.detalle}`, r.canal.ok ? "ok" : "bad");
+    setTimeout(() => aviso(`Lista: ${r.lista.detalle}`, r.lista.ok ? "ok" : "bad"), 400);
+    return;
+  }
+  if ((el = t("[data-guardar-equipo]"))) {
+    const eq = el.dataset.guardarEquipo, v = (c) => { const i = document.querySelector(`[data-cfg="${c}"]`); return i ? i.value.trim() : ""; };
+    let canal = v("canal");
+    if (canal && !canal.startsWith("#") && !/^[CG][A-Z0-9]{6,}$/.test(canal)) canal = `#${canal}`;
+    return enviar("/api/sup/equipos", { accion: "guardar", nombre: eq, canal, lista_id: v("lista_id"), cubre: v("cubre") }, `${eq} guardado.`, ["equipos"]);
+  }
+  if ((el = t("[data-borrar-equipo]"))) { if (!confirm(`¿Borrar el equipo ${el.dataset.borrarEquipo}? No tiene personas.`)) return; S.eqSel = ""; return enviar("/api/sup/equipos", { accion: "borrar", nombre: el.dataset.borrarEquipo }, "Equipo borrado.", ["equipos"]); }
+  if ((el = t("[data-editar-regla]"))) { const [nivel, clave, regla] = el.dataset.editarRegla.split("|"); S.editRegla = { nivel, clave, regla }; return pintar(); }
+  if (t("[data-cancelar-regla]")) { S.editRegla = null; return pintar(); }
+  if (t("[data-guardar-regla]") || t("[data-heredar-regla]")) {
+    const e = S.editRegla, input = document.querySelector("[data-valor-regla]");
+    const cat = S.datos.reglas.catalogo[e.regla];
+    let valor = t("[data-heredar-regla]") ? null : input.value;
+    if (valor !== null && cat.tipo === "bool") valor = valor === "1";
+    S.editRegla = null;
+    return enviar("/api/sup/reglas", { ...e, valor }, valor === null ? "Ahora hereda el valor de arriba." : "Regla guardada.", ["reglas"]);
+  }
+  if ((el = t("[data-quitar-ms]"))) { const [m, k] = el.dataset.quitarMs.split("|"); return enviar("/api/sup/reglas", { nivel: "ms", clave: m, regla: k, valor: null }, "Excepción quitada.", ["reglas"]); }
+  if ((el = t("[data-ep-persona]"))) { abrirPersona(el.dataset.epPersona); return pintar(); }
+  if ((el = t("[data-ed-rol]"))) { S.ed.rol = el.dataset.edRol; return pintar(); }
+  if ((el = t("[data-quitar-aprueba]"))) { S.ed.aprueba = S.ed.aprueba.filter((c) => c !== el.dataset.quitarAprueba); return pintar(); }
+  if ((el = t("[data-accion]"))) {
+    const a = el.dataset.accion;
+    if (a === "tema") { const i = TEMAS.findIndex((x) => x[0] === S.tema); aplicarTema(TEMAS[(i + 1) % TEMAS.length][0]); aviso(`Tema: ${TEMAS.find((x) => x[0] === S.tema)[1].toLowerCase()}.`, "info"); return pintar(); }
+    if (a === "actualizar") {
+      aviso("Buscando actualización…", "info");
+      const r = await api("/api/actualizar", {});
+      if (r.error || !r.ok) return aviso(r.motivo || r.error || "No pude buscar actualización.", "bad");
+      if (!r.nueva) return aviso(`Ya tienes la última versión (${VERSION.replace("sup ", "")}).`, "ok");
+      aviso(`Instalé la ${r.version.replace("sup ", "")}. Recargo el panel en unos segundos…`, "ok");
+      setTimeout(() => location.reload(), 6000);
+      return;
+    }
+    if (a === "nuevo-equipo") { S.nuevoEquipo = true; pintar(); const i = document.getElementById("nuevo-equipo"); if (i) i.focus(); return; }
+    if (a === "cancelar-equipo") { S.nuevoEquipo = false; return pintar(); }
+    if (a === "crear-equipo") {
+      const n = document.getElementById("nuevo-equipo").value.trim();
+      if (!n) return aviso("Escribe el nombre del equipo.", "bad");
+      if (((S.datos.equipos || {}).equipos || []).some((x) => x.nombre.toLowerCase() === n.toLowerCase())) return aviso(`${n} ya existe.`, "bad");
+      S.nuevoEquipo = false;
+      const r = await enviar("/api/sup/equipos", { accion: "guardar", nombre: n }, `Equipo ${n} creado.`, ["equipos"]);
+      if (r) { S.eqSel = n; S.ed = null; pintar(); }
+      return;
+    }
+    if (a === "nueva-excepcion") { S.nuevaExc = { nivel: "equipo", clave: ((S.datos.reglas || {}).equipos || [])[0] || "", regla: "canal_prod", valor: "" }; return pintar(); }
+    if (a === "cancelar-excepcion") { S.nuevaExc = null; return pintar(); }
+    if (a === "guardar-excepcion") {
+      const e = S.nuevaExc, cat = S.datos.reglas.catalogo[e.regla];
+      let valor = e.valor; if (cat.tipo === "bool") valor = /^(1|s[ií]|true|on)$/i.test(String(valor).trim());
+      if (!e.clave) return aviso(e.nivel === "ms" ? "Escribe el microservicio." : "Elige el equipo.", "bad");
+      S.nuevaExc = null;
+      return enviar("/api/sup/reglas", { nivel: e.nivel, clave: e.clave, regla: e.regla, valor }, "Excepción guardada.", ["reglas"]);
+    }
+    if (a === "ep-agregar") {
+      const sel = equipoElegido();
+      S.ed = { correo: "", nombre: "", rol: "desarrollador", equipo: sel === SIN_EQUIPO ? "" : sel, aprueba: [], suplente: "", ausente_desde: 0, ausente_hasta: 0, nuevo: true };
+      S.tokenNuevo = null; S.agregandoAprueba = false; S.programar = false;
+      pintar(); const i = document.querySelector('[data-foco="ed-correo"]'); if (i) i.focus(); return;
+    }
+    if (a === "ep-cerrar") { S.ed = null; S.tokenNuevo = null; return pintar(); }
+    if (a === "ep-agregar-aprueba") { S.agregandoAprueba = true; pintar(); const i = document.getElementById("agregar-aprueba"); if (i) i.focus(); return; }
+    if (a === "ep-todos") { S.ed.aprueba = [...new Set([...S.ed.aprueba, ...personasTodas().filter((p) => p.equipo === S.ed.equipo && !accede(p.rol) && p.correo !== S.ed.correo).map((p) => p.correo)])]; return pintar(); }
+    if (a === "ep-programar") { S.programar = true; return pintar(); }
+    if (a === "guardar-persona") {
+      const e = S.ed, correo = e.correo.trim().toLowerCase();
+      if (!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(correo)) return aviso("Escribe un correo válido.", "bad");
+      const ya = personasTodas().find((p) => p.correo === correo);
+      if (e.nuevo && ya && ya.virtual) return aviso("Esa cuenta no se administra aquí.", "bad");
+      if (e.nuevo && ya && ya.equipo === e.equipo) { abrirPersona(correo); aviso(`${ya.nombre} ya está en ${e.equipo}.`, "info"); return pintar(); }
+      if (e.nuevo && ya && ya.equipo && !confirm(`${ya.nombre} hoy está en ${ya.equipo}. ¿Moverlo a ${e.equipo}?`)) return;
+      const ap = accede(e.rol);
+      const cuerpo = { accion: "guardar", correo, rol: e.rol, equipo: e.equipo, aprueba: ap ? e.aprueba : [], suplente: ap ? e.suplente : "", ausente_desde: ap ? e.ausente_desde || 0 : 0, ausente_hasta: ap ? e.ausente_hasta || 0 : 0 };
+      if (!e.nuevo && ya && ya.rol !== e.rol && !confirm(`${ya.nombre} pasa de ${rolTexto(ya.rol)} a ${rolTexto(e.rol)}: ${accede(e.rol) ? `con su mismo token abrirá ${e.rol === "lider" ? "Hodor Supervisor Pro" : "Hodor Supervisor"}` : "su token de Hodor Supervisor deja de servir"}. ¿Guardar?`)) return;
+      const r = await enviar("/api/sup/personas", cuerpo, e.nuevo ? "Persona agregada." : "Persona guardada.", ["personas", "equipos"]);
+      if (r) { if (e.equipo) S.eqSel = e.equipo; abrirPersona(correo); if (S.ed && e.nuevo && !ap) S.ed = null; pintar(); }
+      return;
+    }
+    if (a === "sacar-equipo") {
+      const e = S.ed;
+      if (!confirm(`¿Sacar a ${e.nombre} de ${e.equipo}? Queda sin equipo${accede(e.rol) ? " y sus devs dejan de llegarle" : " y sin aprobador"}. Lo encuentras en «Sin equipo».`)) return;
+      const eq = e.equipo; S.ed = null;
+      return enviar("/api/sup/equipos", { accion: "miembro", nombre: eq, correo: e.correo, op: "quitar" }, `${e.nombre} ya no está en ${eq}.`, ["personas", "equipos"]);
+    }
+    if (a === "borrar-persona") { if (!confirm(`¿Quitar a ${S.ed.nombre || S.ed.correo} de Hodor? Pierde su rol y su token.`)) return; const c = S.ed.correo; S.ed = null; return enviar("/api/sup/personas", { accion: "borrar", correo: c }, "Persona quitada.", ["personas", "equipos"]); }
+    if (a === "generar-token") {
+      const r = await enviar("/api/sup/personas", { accion: "token", correo: S.ed.correo, op: "generar" }, "Token generado.", ["personas"]);
+      if (r && r.token) { S.tokenNuevo = { correo: S.ed.correo, token: r.token }; pintar(); }
+      return;
+    }
+    if (a === "enviar-paquete") {
+      const quien = S.ed.nombre || S.ed.correo;
+      const guardada = personasTodas().find((p) => p.correo === S.ed.correo) || {};
+      if (guardada.rol !== S.ed.rol) return aviso("Guarda primero el cambio de rol.", "warn");
+      if (!confirm(`Se le envía a ${quien} por DM, con el usuario de Cristian, el link del paquete (vence en 2 días) y su token${(((S.datos.personas || {}).personas || []).find((p) => p.correo === S.ed.correo) || {}).tiene_token ? " actual" : " (se genera uno)"}. ¿Enviar?`)) return;
+      aviso(`Enviando el paquete a ${quien}…`);
+      return enviar("/api/sup/personas", { accion: "enviar", correo: S.ed.correo }, `Envío a ${quien} en camino: le llega por DM en menos de un minuto.`, ["personas"]);
+    }
+    if (a === "revocar-token") { if (!confirm("¿Revocar el token? Su paquete deja de abrir hasta que le generes otro.")) return; S.tokenNuevo = null; return enviar("/api/sup/personas", { accion: "token", correo: S.ed.correo, op: "revocar" }, "Token revocado.", ["personas"]); }
+    if (a === "copiar-token") { try { await navigator.clipboard.writeText(S.tokenNuevo.token); aviso("Token copiado.", "ok"); } catch { aviso("No pude copiar: selecciónalo a mano.", "bad"); } return; }
+  }
+});
+
+document.addEventListener("input", (ev) => {
+  const el = ev.target;
+  if (el.matches("[data-busca]")) { S.busca = el.value; return pintar(); }
+  if (el.matches("[data-ed]") && S.ed && el.tagName === "INPUT") { S.ed[el.dataset.ed] = el.value; return; }
+  if (el.matches("[data-exc]") && S.nuevaExc && el.tagName === "INPUT") { S.nuevaExc[el.dataset.exc] = el.value; }
+});
+document.addEventListener("change", (ev) => {
+  const el = ev.target;
+  if (el.matches("[data-equipo-global]")) { S.equipo = el.value; invalidar("metricas", "metricasEq"); S.sel = ""; pintar(); return cargarTab(); }
+  if (el.matches("[data-staging]")) { S.staging = el.checked; invalidar("metricasEq"); S.ficha = null; pintar(); return cargarTab(); }
+  if (el.matches("[data-ed]") && S.ed && el.tagName === "SELECT") { S.ed[el.dataset.ed] = el.value; if (el.dataset.ed === "equipo") return pintar(); return; }
+  if (el.matches("[data-agregar-aprueba]") && S.ed && el.value) { S.ed.aprueba = [...new Set([...S.ed.aprueba, el.value])]; S.agregandoAprueba = false; return pintar(); }
+  if (el.matches("[data-ausente-ahora]") && S.ed) { if (el.checked) { S.ed.ausente_desde = Math.floor(ahora()); S.ed.ausente_hasta = 0; } else { S.ed.ausente_desde = 0; S.ed.ausente_hasta = 0; } return pintar(); }
+  if (el.matches("[data-ed-fecha]") && S.ed) { S.ed[el.dataset.edFecha] = desdeInput(el.value, el.dataset.edFecha === "ausente_hasta"); return pintar(); }
+  if (el.matches("[data-exc]") && S.nuevaExc && el.tagName === "SELECT") { S.nuevaExc[el.dataset.exc] = el.value; if (el.dataset.exc === "nivel") { S.nuevaExc.clave = el.value === "equipo" ? (((S.datos.reglas || {}).equipos || [])[0] || "") : ""; } return pintar(); }
+});
+document.addEventListener("keydown", (ev) => {
+  if (ev.key === "Enter" && ev.target.matches("tr.clic")) { ev.preventDefault(); ev.target.click(); }
+  if (ev.key === "Escape" && S.ed && S.tab === "equipos" && !ev.target.matches("select, input, textarea")) { S.ed = null; S.tokenNuevo = null; pintar(); }
+  if (ev.key === "Enter" && ev.target.matches("#nuevo-equipo")) { ev.preventDefault(); const b = document.querySelector('[data-accion="crear-equipo"]'); if (b) b.click(); }
+  if (ev.key === "Enter" && ev.target.matches("[data-valor-regla]")) { ev.preventDefault(); const b = document.querySelector("[data-guardar-regla]"); if (b) b.click(); }
+});
+window.addEventListener("popstate", () => {
+  S.tab = tabDeRuta();
+  S.metTab = new URLSearchParams(location.search).get("t") || S.metTab;
+  const c = new URLSearchParams(location.search).get("c");
+  S.fichaDe = S.tab === "equipos" && c ? c : ""; S.ficha = null;
+  pintar(); cargarTab();
+});
+
+async function arrancar() {
+  aplicarTema(leerTema());
+  const [yo, estado] = await Promise.all([api("/api/sup/yo"), api("/api/estado")]);
+  S.estado = estado && !estado.error ? estado : null;
+  if (yo.error) { S.error = yo.error; return pintar(); }
+  S.yo = yo;
+  document.title = pro() ? "Hodor Supervisor Pro" : "Hodor Supervisor";
+  { const f = document.getElementById("favicon"); if (f) f.href = pro() ? "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23142a66'/%3E%3Crect x='7' y='17' width='4' height='8' rx='1.5' fill='%235adbff'/%3E%3Crect x='14' y='11' width='4' height='14' rx='1.5' fill='%2390e7ff'/%3E%3Crect x='21' y='7' width='4' height='18' rx='1.5' fill='%23eef1fa'/%3E%3C/svg%3E" : "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231f49b6'/%3E%3Cpath d='M9 16.5l4.5 4.5L23 11.5' fill='none' stroke='%23eef1fa' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"; }
+  S.tab = tabDeRuta();
+  const c = new URLSearchParams(location.search).get("c");
+  if (S.tab === "equipos" && c) S.fichaDe = c;
+  const tMet = new URLSearchParams(location.search).get("t");
+  if (S.tab === "metricas" && tMet) S.metTab = tMet;
+  if (location.pathname !== `/${S.tab}`) history.replaceState({}, "", `/${S.tab}${S.fichaDe ? `?c=${encodeURIComponent(S.fichaDe)}` : ""}${S.tab === "metricas" && tMet ? `?t=${encodeURIComponent(tMet)}` : ""}`);
+  pintar();
+  if (pro()) traer("equipos", "/api/sup/equipos");
+  cargarTab();
+}
+arrancar();
+</script>
+</body>
+</html>
