@@ -21,7 +21,7 @@ import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-VERSION = "sup 2.3.2"
+VERSION = "sup 2.3.3"
 AQUI = Path(__file__).resolve().parent
 CASA = Path(os.environ.get("HODOR_SUP_HOME") or (Path.home() / ".hodor-sup"))
 
