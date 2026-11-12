@@ -353,9 +353,15 @@ function chipPuerta(estado) { return { ok: "c-ok", na: "c-off", warn: "c-warn", 
 function chipEstado(e) { return { mergeado: "c-ok", abierto: "c-acc", cerrado: "c-off" }[e] || "c-off"; }
 function puntajeIa(x) { const g = (x.puertas || []).find((p) => p.k === "ia"); return g ? g.t : ""; }
 
+function confianzaHtml(cf) {
+  if (!cf || cf.valor == null) return "";
+  const cls = cf.nivel === "alta" ? "c-ok" : cf.nivel === "media" ? "c-warn" : "c-bad";
+  const tip = `Piloto, solo informativo: confianza de la revisión de IA según el diff.${(cf.senales || []).length ? " Baja por: " + cf.senales.join("; ") + "." : " Sin señales de riesgo."}${cf.muestreo ? " Habría ido a muestreo humano." : ""}`;
+  return `<span class="chip ${cls}" title="${esc(tip)}">Confianza ${esc(cf.valor)}</span>`;
+}
 function hermanoHtml(c) {
   const nota = [c.rondas ? `${c.rondas} ${c.rondas === 1 ? "ronda" : "rondas"}` : "sin análisis", c.puntaje != null ? `IA ${c.puntaje}` : "", c.rev ? `rev ${c.rev}` : ""].filter(Boolean).join(" · ");
-  return `<div class="hermano${c.actual ? " actual" : ""}"><span class="mono">${externo(c.url, `#${esc(c.pr)}`)}</span><span style="flex:1;min-width:160px">${esc(c.titulo || c.rama || "")}${c.actual ? ` <span class="chip c-acc">este</span>` : ""}</span><span class="nota">${esc(nota)}</span><span class="chip ${chipEstado(c.estado)}">${esc(c.estado)}</span></div>`;
+  return `<div class="hermano${c.actual ? " actual" : ""}"><span class="mono">${externo(c.url, `#${esc(c.pr)}`)}</span><span style="flex:1;min-width:160px">${esc(c.titulo || c.rama || "")}${c.actual ? ` <span class="chip c-acc">este</span>` : ""}</span><span class="nota">${esc(nota)}</span>${confianzaHtml(c.confianza)}<span class="chip ${chipEstado(c.estado)}">${esc(c.estado)}</span></div>`;
 }
 function cadenaHtml(x) {
   const c = x.cadena || {};
